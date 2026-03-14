@@ -1,0 +1,29 @@
+[33maedc252[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjasir_70[m[33m)[m HEAD@{0}: checkout: moving from jasir_70 to jasir_70
+[33maedc252[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjasir_70[m[33m)[m HEAD@{1}: checkout: moving from ddf28a76467c85cdb0796e279823bcc21e557e3f to jasir_70
+[33mddf28a7[m[33m ([m[1;31morigin/jasir_70[m[33m)[m HEAD@{2}: pull origin jasir_70 --rebase (start): checkout ddf28a76467c85cdb0796e279823bcc21e557e3f
+[33m74c61fd[m[33m ([m[1;32mmain[m[33m)[m HEAD@{3}: commit: Fix build errors and update price logic
+[33m342f395[m HEAD@{4}: commit: generate product first
+[33maea0f5a[m HEAD@{5}: commit: feat: Implement initial affiliate application with dashboard, earning, payout, and affiliate link modules.
+[33m498f27a[m HEAD@{6}: checkout: moving from jasir_70 to main
+[33maedc252[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjasir_70[m[33m)[m HEAD@{7}: checkout: moving from main to jasir_70
+[33m498f27a[m HEAD@{8}: commit: affilate
+[33mc4ec237[m HEAD@{9}: checkout: moving from jasir_70 to main
+[33maedc252[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjasir_70[m[33m)[m HEAD@{10}: checkout: moving from main to jasir_70
+[33mc4ec237[m HEAD@{11}: commit: payout
+[33m6ba5d80[m HEAD@{12}: commit: feat: Add product sharing functionality and DevTools configuration
+[33m7a82df7[m HEAD@{13}: reset: moving to HEAD
+[33m7a82df7[m HEAD@{14}: reset: moving to HEAD~1
+[33m632fc98[m HEAD@{15}: rebase (abort): returning to refs/heads/main
+[33me298818[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{16}: pull origin main --rebase (start): checkout e2988188965f4ebb036347aafeca79a3f053a07d
+[33m632fc98[m HEAD@{17}: commit: Initial commit
+[33m7a82df7[m HEAD@{18}: commit: new
+[33m8a12a8e[m HEAD@{19}: commit: affilate app
+[33mdbb70cb[m HEAD@{20}: commit: Initial commit
+[33m603741f[m HEAD@{21}: commit (merge): Merge branch 'main' of https://github.com/Jasir-afk/affiliate
+[33mb25a94d[m HEAD@{22}: commit: build: Configure Android build with `build.gradle.kts` and streamline platform metadata.
+[33m2f17a50[m HEAD@{23}: commit: Initial project commit
+[33mee7040a[m HEAD@{24}: pull origin main: updating HEAD
+[33mee7040a[m HEAD@{25}: pull origin main: updating HEAD
+[33mee7040a[m HEAD@{26}: commit: feat: Initialize Flutter project with Android build configuration and Dart package setup.
+[33m66cc790[m HEAD@{27}: checkout: moving from jasir_70 to main
+[33maedc252[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjasir_70[m[33m)[m HEAD@{28}: commit (initial): Initial commit
