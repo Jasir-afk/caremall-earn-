@@ -10,3 +10,6 @@
 #-keep class com.getx.** { *; }
 
 # Retrofit/OkHttp/Dio rules if they had issues, but Dio usually works fine.
+
+# Google Play Core rules to fix R8 missing class errors
+-dontwarn com.google.android.play.core.**
