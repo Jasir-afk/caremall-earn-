@@ -1,0 +1,16 @@
+{
+  "dart.projectSearchDepth": 10,
+  "dart.sdkPath": null,
+  "dart.flutterSdkPath": null,
+  "dart.enableSdkFormatter": true,
+  "dart.promptToGetPackages": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "Dart-Code.dart-code",
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  }
+}
