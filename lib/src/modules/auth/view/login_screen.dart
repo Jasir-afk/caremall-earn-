@@ -110,13 +110,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Logo and Description
-                        SizedBox(
-                          width: 170,
-                          height: 40,
-                          child: Assets.icons.appLogoPng.image(
-                            fit: BoxFit.fitHeight,
-                          ),
-                        ),
+                        // SizedBox(
+                        //   width: 200,
+                        //   height: 50,
+                        //   child: Assets.icons.appLogoPng.image(
+                        //     fit: BoxFit.cover,
+                        //   ),
+                        // ),
                         defaultSpacerSmall,
                         AppText(
                           text: 'Join the Care Mall Affiliate Program',

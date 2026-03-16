@@ -5,7 +5,6 @@ import 'package:care_mall_affiliate/src/modules/kyc_profile/controller/kyc_contr
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-
 import 'package:care_mall_affiliate/app/utils/dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -16,7 +15,6 @@ void main() async {
   DI.inject();
   Get.put(AuthController());
   Get.put(KycController(), permanent: true);
-
   runApp(const MyApp());
 }
 
