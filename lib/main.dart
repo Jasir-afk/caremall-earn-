@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           color: Colors.white,
-          title: 'Care Mall Affiliate',
+          title: 'Care Earn+',
           theme: ThemeData(useMaterial3: true),
           home: Center(child: const SplashScreen()),
         );
