@@ -33,7 +33,7 @@ class PayoutView extends StatelessWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                  child: Column(children: [_buildSummaryGrid(controller)]),
+                  child: _buildSummaryGrid(controller),
                 ),
               ),
 
@@ -62,6 +62,7 @@ class PayoutView extends StatelessWidget {
               // ── Loading / Error / Empty / List
               if (controller.isLoading.value)
                 const SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Center(
                     child: CircularProgressIndicator(color: Colors.red),
                   ),
@@ -69,10 +70,14 @@ class PayoutView extends StatelessWidget {
               else if (controller.errorMessage.value.isNotEmpty &&
                   controller.payouts.isEmpty)
                 SliverFillRemaining(
+                  hasScrollBody: false,
                   child: _buildErrorState(controller.errorMessage.value),
                 )
               else if (controller.filteredPayouts.isEmpty)
-                SliverFillRemaining(child: _buildEmptyState())
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _buildEmptyState(),
+                )
               else
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),

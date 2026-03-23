@@ -131,11 +131,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Logo and Description
-                SizedBox(
-                  width: 170,
-                  height: 40,
-                  child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
-                ),
+                // SizedBox(
+                //   width: 170,
+                //   height: 40,
+                //   child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
+                // ),
                 defaultSpacerSmall,
                 AppText(
                   text: 'Join the Care Mall Affiliate Program',

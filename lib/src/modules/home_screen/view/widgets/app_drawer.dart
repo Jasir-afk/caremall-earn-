@@ -32,11 +32,12 @@ class AppDrawer extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    height: 35,
-                    child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
+                    height: 60,
+                    width: 140,
+                    child: Assets.icons.appLogoPng.image(fit: BoxFit.cover),
                   ),
-                  const SizedBox(width: 12),
 
+                  // const SizedBox(width: 12),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),

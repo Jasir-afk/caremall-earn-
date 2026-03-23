@@ -26,4 +26,5 @@ class Apiurls {
   static const String linksStats = '$baseUrl/api/v1/affiliate/links/stats';
   static const String returnOrders = '$baseUrl/api/v1/affiliate/orders/returns';
   static const String payouts = '$baseUrl/api/v1/affiliate/payouts';
+  static const String deleteAccount = '$baseUrl/api/v1/affiliate/auth/delete-account';
 }

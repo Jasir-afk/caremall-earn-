@@ -15,19 +15,15 @@ class Assets {
 class _AssetsIconsGen {
   const _AssetsIconsGen();
 
-  SvgGenImage get appLogo => const SvgGenImage('assets/icons/app_logo.svg');
-
   SvgGenImage get mail => const SvgGenImage('assets/icons/mail.svg');
 
   SvgGenImage get phone => const SvgGenImage('assets/icons/phone.svg');
 
   SvgGenImage get user => const SvgGenImage('assets/icons/user.svg');
 
-  AssetGenImage get logo => const AssetGenImage('assets/icons/logo.png');
-
   // PNG logo as fallback
   AssetGenImage get appLogoPng =>
-      const AssetGenImage('assets/icons/app_logo.png');
+      const AssetGenImage('assets/icons/app_logo_image.png');
 }
 
 /// -----------------------------
@@ -37,7 +33,6 @@ class _AssetsImagesGen {
   const _AssetsImagesGen();
 
   AssetGenImage get example => const AssetGenImage('assets/images/example.png');
-  AssetGenImage get logo => const AssetGenImage('assets/icons/logo.png');
 }
 
 /// -----------------------------

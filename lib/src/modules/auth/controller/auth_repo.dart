@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 /// Repository class for authentication-related API calls
 /// Follows the repository pattern to separate data layer from business logic
 class AuthRepo {
-  static final DioClient _dio = Get.find<DioClient>();
+  static DioClient get _dio => Get.find<DioClient>();
 
   /// Sends OTP to the provided phone number
   static Future<Map<String, dynamic>> sendOtp({
@@ -19,7 +19,6 @@ class AuthRepo {
         Apiurls.sendOtp,
         body: {'phone': phone, 'mode': mode, 'name': name, 'email': email},
       );
-
       final responseData = response.data;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -75,6 +74,32 @@ class AuthRepo {
           'success': false,
           'message':
               responseData['message'] ?? 'Invalid OTP. Please try again.',
+          'data': responseData,
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  /// Deletes the user's account
+  static Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final response = await _dio.delete(Apiurls.deleteAccount);
+      final responseData = response.data;
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Account deleted successfully',
+          'data': responseData,
+        };
+      } else {
+        return {
+          'success': false,
+          'message':
+              responseData['message'] ??
+              'Failed to delete account. Please try again.',
           'data': responseData,
         };
       }

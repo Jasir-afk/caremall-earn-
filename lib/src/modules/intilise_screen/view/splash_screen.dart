@@ -76,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
           opacity: _opacity,
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
-          child: Image.asset(Assets.icons.logo.keyName, scale: 4),
+          child: Image.asset(Assets.icons.appLogoPng.keyName, scale: 2),
         ),
       ),
     );
