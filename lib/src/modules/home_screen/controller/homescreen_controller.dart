@@ -99,6 +99,7 @@ class DashboardController extends GetxController {
           msg.contains('ClientException');
       if (isNetworkError) {
         errorMessage.value = 'No internet connection.';
+        TcSnackbar.noInternet();
       } else {
         errorMessage.value = 'Failed to load data. Please try again.';
         TcSnackbar.error('Error', errorMessage.value);
@@ -278,7 +279,17 @@ class DashboardController extends GetxController {
       // Handle success but null data if needed
       dashboardData.value = [];
     } else {
-      TcSnackbar.error('Error', result['message']);
+      final msg = result['message']?.toString() ?? '';
+      final isNetworkError = msg.contains('SocketException') ||
+          msg.contains('Failed host lookup') ||
+          msg.contains('Network error') ||
+          msg.contains('ClientException');
+
+      if (isNetworkError) {
+        TcSnackbar.noInternet();
+      } else {
+        TcSnackbar.error('Error', result['message']);
+      }
     }
     // isLoading.value = false; // Managed by loadDashboardData
   }

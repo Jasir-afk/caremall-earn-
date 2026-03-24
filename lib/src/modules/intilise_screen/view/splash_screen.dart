@@ -1,4 +1,5 @@
 import 'package:care_mall_affiliate/app/deeplink/deeplink_service.dart';
+import 'package:care_mall_affiliate/app/services/update_service.dart';
 import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/gen/assets.gen.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
@@ -32,6 +33,19 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateAfterDelay() async {
+    // 🔧 Check for a mandatory update FIRST — halts navigation if update is needed
+    if (mounted) {
+      final updateRequired = await UpdateService.showUpdateDialogIfNeeded(
+        context,
+        force: false,
+      );
+
+      if (updateRequired) {
+        debugPrint('🛑 Update required. Navigation halted.');
+        return; // User is blocked on the update dialog until they update
+      }
+    }
+
     final authController = Get.find<AuthController>();
 
     // Initial check: if already logged in (token present in memory/SharedPreferences),
