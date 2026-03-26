@@ -12,14 +12,13 @@ import 'package:get_storage/get_storage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  await DeepLinkService().init();
   DI.inject();
+  await DeepLinkService().init();
   Get.put(AuthController());
   Get.put(KycController(), permanent: true);
 
   // 🔧 Clear upgrader cache to ensure version check runs accurately
   UpdateService.configure(debugLogging: false);
-
   runApp(const MyApp());
 }
 

@@ -12,18 +12,15 @@ import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   double _opacity = 0.0;
-
   @override
   void initState() {
     super.initState();
-
     // Trigger fade-in animation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) setState(() => _opacity = 1.0);

@@ -10,16 +10,23 @@ class UpdateService {
   static Future<bool> showUpdateDialogIfNeeded(
     BuildContext context, {
     bool force = false,
+    String? minAppVersion, // e.g. "1.0.12" to force everyone below this
   }) async {
     try {
+      // Clear saved settings during check to ensure we get fresh results
+      if (force) {
+        await Upgrader.clearSavedSettings();
+      }
+
       // Get actual app version & package name
       final packageInfo = await PackageInfo.fromPlatform();
       final packageName = packageInfo.packageName;
       final currentVersion = packageInfo.version;
 
       debugPrint(
-        '🔍 [UpdateService] Checking for updates. '
-        'Current Version: $currentVersion, Package: $packageName',
+        '🔍 [UpdateService] Checking for updates...\n'
+        '   - Current Version: $currentVersion\n'
+        '   - Package Name: $packageName',
       );
 
       final upgrader = Upgrader(
@@ -28,24 +35,52 @@ class UpdateService {
         durationUntilAlertAgain: const Duration(seconds: 1),
       );
 
-      debugPrint('🚀 [UpdateService] Initializing Upgrader...');
-      // Use a timeout to prevent hanging if Play Store is unreachable
-      await upgrader.initialize().timeout(
-        const Duration(seconds: 5),
+      debugPrint('🚀 [UpdateService] Initializing Upgrader (10s timeout)...');
+      
+      // Use a longer timeout for slower networks
+      final initSuccessful = await upgrader.initialize().timeout(
+        const Duration(seconds: 10),
         onTimeout: () {
           debugPrint('⚠️ [UpdateService] Upgrader initialization timed out.');
           return false;
         },
       );
 
+      if (!initSuccessful) {
+        debugPrint('❌ [UpdateService] Failed to initialize upgrader or no internet.');
+      }
+
       final storeVersion = upgrader.currentAppStoreVersion;
       final installedVersion = upgrader.currentInstalledVersion;
-      final updateAvailable = upgrader.isUpdateAvailable();
+      
+      // Manual check as a fallback because upgrader.isUpdateAvailable() can be picky
+      bool updateAvailable = upgrader.isUpdateAvailable();
+      
+      // Mandatory min version check (if provided manually)
+      if (minAppVersion != null && installedVersion != null) {
+        try {
+          // A very basic comparison; for more complex ones use Version.parse()
+          if (installedVersion.compareTo(minAppVersion) < 0) {
+             debugPrint('🚨 [UpdateService] Forced update: local $installedVersion is older than min $minAppVersion');
+             updateAvailable = true;
+          }
+        } catch (e) {
+          debugPrint('⚠️ [UpdateService] Error comparing versions: $e');
+        }
+      }
+      
+      // Extra safety: if store version is found but upgrader says false, it might be build number mismatch
+      if (!updateAvailable && storeVersion != null && installedVersion != null) {
+        if (storeVersion != installedVersion) {
+           debugPrint('💡 [UpdateService] Versions differ ($installedVersion vs $storeVersion) but upgrader says no update. Overriding.');
+           updateAvailable = true;
+        }
+      }
 
       debugPrint('📊 [UpdateService] Diagnostics:');
-      debugPrint('   - Package Name    : $packageName');
       debugPrint('   - Installed       : $installedVersion');
       debugPrint('   - Play Store      : $storeVersion');
+      debugPrint('   - Min Required    : $minAppVersion');
       debugPrint('   - Update Available: $updateAvailable');
       debugPrint('   - Force Mode      : $force');
 
