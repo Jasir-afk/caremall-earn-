@@ -1,6 +1,5 @@
 import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
 import 'package:dio/dio.dart';
-
 import 'dio_exception.dart';
 import 'dio_interceptor.dart';
 
@@ -13,8 +12,10 @@ class DioClient {
         baseUrl: Apiurls.baseUrl,
         connectTimeout: const Duration(seconds: 20),
         receiveTimeout: const Duration(seconds: 20),
-        headers: {'Content-Type': 'application/json'},
-        validateStatus: (_) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
       ),
     );
 
@@ -24,16 +25,16 @@ class DioClient {
   Future<Response> get(
     String endpoint, {
     Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
     Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.get(
+      return await _dio.get(
         endpoint,
         queryParameters: queryParams,
-        options: options ?? Options(headers: headers),
+        options: options,
+        cancelToken: cancelToken,
       );
-      return _handleResponse(response);
     } catch (e) {
       throw DioExceptionHandler.handleException(e);
     }
@@ -43,16 +44,17 @@ class DioClient {
     String endpoint, {
     dynamic body,
     Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.post(
+      return await _dio.post(
         endpoint,
         data: body,
         queryParameters: queryParams,
-        options: Options(headers: headers),
+        options: options,
+        cancelToken: cancelToken,
       );
-      return _handleResponse(response);
     } catch (e) {
       throw DioExceptionHandler.handleException(e);
     }
@@ -60,18 +62,19 @@ class DioClient {
 
   Future<Response> put(
     String endpoint, {
-    Map<String, dynamic>? body,
+    dynamic body,
     Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.put(
+      return await _dio.put(
         endpoint,
         data: body,
         queryParameters: queryParams,
-        options: Options(headers: headers),
+        options: options,
+        cancelToken: cancelToken,
       );
-      return _handleResponse(response);
     } catch (e) {
       throw DioExceptionHandler.handleException(e);
     }
@@ -81,16 +84,17 @@ class DioClient {
     String endpoint, {
     dynamic body,
     Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.patch(
+      return await _dio.patch(
         endpoint,
         data: body,
         queryParameters: queryParams,
-        options: Options(headers: headers),
+        options: options,
+        cancelToken: cancelToken,
       );
-      return _handleResponse(response);
     } catch (e) {
       throw DioExceptionHandler.handleException(e);
     }
@@ -98,31 +102,37 @@ class DioClient {
 
   Future<Response> delete(
     String endpoint, {
+    dynamic body,
     Map<String, dynamic>? queryParams,
-    Map<String, String>? headers,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final response = await _dio.delete(
+      return await _dio.delete(
         endpoint,
+        data: body,
         queryParameters: queryParams,
-        options: Options(headers: headers),
+        options: options,
+        cancelToken: cancelToken,
       );
-      return _handleResponse(response);
     } catch (e) {
       throw DioExceptionHandler.handleException(e);
     }
   }
 
-  Response _handleResponse(Response response) {
-    final statusCode = response.statusCode ?? 0;
-    if (statusCode >= 200 && statusCode < 500) {
-      return response;
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
+  Future<Response> postMultipart(
+    String endpoint, {
+    required Map<String, dynamic> data,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      return await _dio.post(
+        endpoint,
+        data: FormData.fromMap(data),
+        cancelToken: cancelToken,
       );
+    } catch (e) {
+      throw DioExceptionHandler.handleException(e);
     }
   }
 }

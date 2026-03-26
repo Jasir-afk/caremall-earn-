@@ -15,11 +15,29 @@ class TcSnackbar {
   static void warning(String title, String message) =>
       _show(title: title, message: message, type: _SnackType.warning);
 
-  static void error(String title, String message) =>
+  static void error(String title, String message) {
+    final msg = message.toLowerCase();
+    final isNetwork =
+        msg.contains('socketexception') ||
+        msg.contains('failed host lookup') ||
+        msg.contains('network error') ||
+        msg.contains('clientexception');
+
+    if (isNetwork) {
+      noInternet();
+    } else {
       _show(title: title, message: message, type: _SnackType.error);
+    }
+  }
 
   static void info(String title, String message) =>
       _show(title: title, message: message, type: _SnackType.info);
+
+  static void noInternet() => _show(
+    title: 'No Connection',
+    message: 'Please check your internet connection and try again.',
+    type: _SnackType.error,
+  );
 
   static void _show({
     required String title,

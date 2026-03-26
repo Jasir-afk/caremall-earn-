@@ -3,6 +3,6 @@ import 'package:get/instance_manager.dart';
 
 class DI {
   static inject() {
-    Get.lazyPut(() => DioClient());
+    Get.put(DioClient(), permanent: true);
   }
 }
