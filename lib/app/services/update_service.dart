@@ -90,8 +90,9 @@ class UpdateService {
       
       // Extra safety: if store version is found but upgrader says false, it might be build number mismatch
       if (!updateAvailable && storeVersion != null && installedVersion != null) {
-        if (storeVersion != installedVersion) {
-           debugPrint('💡 [UpdateService] Versions differ ($installedVersion vs $storeVersion) but upgrader says no update. Overriding.');
+        // FIXED: Only show if installed < store (not just when they differ)
+        if (installedVersion.compareTo(storeVersion) < 0) {
+           debugPrint('💡 [UpdateService] Versions differ: local $installedVersion is older than store $storeVersion. Forcing update.');
            updateAvailable = true;
         }
       }
