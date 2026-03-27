@@ -69,7 +69,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         elevation: 0,
         surfaceTintColor: Colors.white,
         title: SizedBox(
-          height: 30,
+          height: 140,
+          width: 100,
           child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
         ),
         actions: [

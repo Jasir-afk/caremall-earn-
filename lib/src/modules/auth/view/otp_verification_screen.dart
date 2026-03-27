@@ -5,7 +5,7 @@ import 'package:care_mall_affiliate/app/commenwidget/apptext.dart';
 import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/app/utils/network/auth_service.dart';
 import 'package:care_mall_affiliate/app/utils/spaces.dart';
-import 'package:care_mall_affiliate/gen/assets.gen.dart';
+// import 'package:care_mall_affiliate/gen/assets.gen.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/view/home_screen.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/view/kyc_screen.dart';
@@ -236,11 +236,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // CareMall Logo
-                  SizedBox(
-                    width: 170.w,
-                    height: 40.h,
-                    child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
-                  ),
+                  // SizedBox(
+                  //   width: 170.w,
+                  //   height: 40.h,
+                  //   child: Assets.icons.appLogoPng.image(fit: BoxFit.fitHeight),
+                  // ),
                   defaultSpacerLarge,
 
                   // Title

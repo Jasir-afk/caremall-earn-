@@ -394,42 +394,8 @@ class CreateLinkController extends GetxController {
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 8.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '₹${product.landingSellPrice % 1 == 0 ? product.landingSellPrice.toInt().toString() : product.landingSellPrice.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF4CAF50),
-                      ),
-                    ),
-                    if (product.mrpPrice > product.landingSellPrice) ...[
-                      SizedBox(width: 8.w),
-                      Text(
-                        '₹${product.mrpPrice % 1 == 0 ? product.mrpPrice.toInt().toString() : product.mrpPrice.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[400],
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
               ],
-              SizedBox(height: 12.h),
-              Text(
-                'Your affiliate link has been created successfully. Copy it and start earning commissions.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14.sp,
-                  height: 1.5,
-                ),
-              ),
+
               SizedBox(height: 24.h),
               Align(
                 alignment: Alignment.centerLeft,

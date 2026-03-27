@@ -1041,9 +1041,7 @@ class EarningScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  summary.nextPayoutDate.isNotEmpty
-                      ? _formatPayoutDate(summary.nextPayoutDate)
-                      : 'To be announced',
+                  _formatPayoutDate(summary.nextPayoutDate),
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
@@ -1069,8 +1067,15 @@ class EarningScreen extends StatelessWidget {
 
   String _formatPayoutDate(String dateStr) {
     try {
-      final dt = DateTime.tryParse(dateStr);
-      if (dt == null) return dateStr;
+      DateTime dt;
+      final now = DateTime.now();
+
+      if (dateStr.isNotEmpty) {
+        dt = DateTime.tryParse(dateStr) ?? _calculateNextPayoutDate(now);
+      } else {
+        dt = _calculateNextPayoutDate(now);
+      }
+
       const months = [
         'January',
         'February',
@@ -1085,9 +1090,20 @@ class EarningScreen extends StatelessWidget {
         'November',
         'December',
       ];
-      return 'Payout in ${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+      return 'Next ${months[dt.month - 1]} ${dt.day}, ${dt.year}';
     } catch (_) {
       return dateStr;
+    }
+  }
+
+  DateTime _calculateNextPayoutDate(DateTime now) {
+    // Payout is on the 15th of every month.
+    // If today is before 15th, next payout is 15th of this month.
+    // If today is 15th or later, next payout is 15th of next month.
+    if (now.day < 15) {
+      return DateTime(now.year, now.month, 15);
+    } else {
+      return DateTime(now.year, now.month + 1, 15);
     }
   }
 

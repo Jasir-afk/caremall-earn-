@@ -1,4 +1,5 @@
 import 'package:care_mall_affiliate/app/deeplink/deeplink_service.dart';
+import 'package:care_mall_affiliate/app/services/update_service.dart';
 import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/gen/assets.gen.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
@@ -11,18 +12,15 @@ import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   double _opacity = 0.0;
-
   @override
   void initState() {
     super.initState();
-
     // Trigger fade-in animation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) setState(() => _opacity = 1.0);
@@ -32,6 +30,22 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateAfterDelay() async {
+    // 🔧 Check for a mandatory update FIRST — halts navigation if update is needed
+    if (mounted) {
+      // 🚀 Pass the latest version manually as a fallback for when Play Store detection fails
+      // Set minAppVersion to "1.0.0+13" (higher than current 1.0.0+10) to test
+      final updateRequired = await UpdateService.showUpdateDialogIfNeeded(
+        context,
+        force: true, // 🚨 Temporarily set to TRUE to see the popup
+        // minAppVersion is now null so it only checks Play Store versions
+      );
+
+      if (updateRequired) {
+        debugPrint('🛑 Update required. Navigation halted.');
+        return; // User is blocked on the update dialog until they update
+      }
+    }
+
     final authController = Get.find<AuthController>();
 
     // Initial check: if already logged in (token present in memory/SharedPreferences),
@@ -76,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
           opacity: _opacity,
           duration: const Duration(seconds: 2),
           curve: Curves.easeInOut,
-          child: Image.asset(Assets.icons.logo.keyName, scale: 4),
+          child: Image.asset(Assets.icons.appLogoPng.keyName, scale: 2),
         ),
       ),
     );

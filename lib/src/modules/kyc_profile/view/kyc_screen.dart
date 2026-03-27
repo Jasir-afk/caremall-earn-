@@ -7,6 +7,7 @@ import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/model/kyc_model.dart';
 import 'package:flutter/services.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
+import 'package:care_mall_affiliate/src/modules/home_screen/view/home_screen.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/view/widgets/app_drawer.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/controller/homescreen_controller.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/controller/kyc_controller.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:care_mall_affiliate/src/modules/kyc_profile/view/widgets/deletebutton.dart';
 
 class KycScreen extends StatefulWidget {
   const KycScreen({super.key});
@@ -371,35 +373,41 @@ class _KycScreenState extends State<KycScreen> {
   InputDecoration _inputDecoration(
     String hint, {
     Widget? suffixIcon,
+    Widget? prefixIcon,
     bool disabled = false,
   }) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
+      prefixIcon: prefixIcon,
+      hintStyle: TextStyle(
+        color: Colors.grey[400],
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w400,
+      ),
       suffixIcon: suffixIcon,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: Colors.grey[200]!, width: 1),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: Colors.grey[200]!, width: 1),
       ),
       disabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: Colors.grey[100]!, width: 1),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12.r),
         borderSide: const BorderSide(color: AppColors.primarycolor, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: AppColors.errorMain),
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: AppColors.errorMain.withOpacity(0.5)),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12.r),
         borderSide: const BorderSide(color: AppColors.errorMain, width: 1.5),
       ),
       filled: true,
@@ -459,115 +467,112 @@ class _KycScreenState extends State<KycScreen> {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            height: 110.h,
+            height: 120.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color:
+                  file != null ||
+                      (base64Image != null && base64Image.isNotEmpty)
+                  ? Colors.white
+                  : Colors.grey[50],
               border: Border.all(
-                color: file != null ? AppColors.successMain : Colors.grey[300]!,
-                width: 1.5,
+                color:
+                    file != null ||
+                        (base64Image != null && base64Image.isNotEmpty)
+                    ? AppColors.successMain.withOpacity(0.5)
+                    : Colors.grey[300]!,
+                width: 1,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: file != null
-                ? Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(file, fit: BoxFit.cover),
-                      ),
-                      Positioned(
-                        top: 6,
-                        right: 6,
-                        child: GestureDetector(
-                          onTap: onRemove,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 16.sp,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : (base64Image != null && base64Image.isNotEmpty)
-                ? Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: base64Image.startsWith('http')
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.r),
+              child: file != null
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.file(file, fit: BoxFit.cover),
+                        _buildRemoveOverlay(onRemove),
+                      ],
+                    )
+                  : (base64Image != null && base64Image.isNotEmpty)
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        base64Image.startsWith('http')
                             ? Image.network(
                                 base64Image,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Center(
-                                      child: Icon(Icons.broken_image),
-                                    ),
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(Icons.broken_image),
+                                ),
                               )
                             : Image.memory(
                                 base64Decode(base64Image),
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Center(
-                                    child: Icon(
-                                      Icons.error_outline,
-                                      color: Colors.red,
-                                      size: 24.sp,
-                                    ),
-                                  );
-                                },
+                                errorBuilder: (_, __, ___) => const Center(
+                                  child: Icon(Icons.broken_image),
+                                ),
                               ),
-                      ),
-                      Positioned(
-                        top: 6,
-                        right: 6,
-                        child: GestureDetector(
-                          onTap: onRemove,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 16.sp,
-                              color: Colors.white,
-                            ),
+                        _buildRemoveOverlay(onRemove),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(10.r),
+                          decoration: BoxDecoration(
+                            color: AppColors.primarycolor.withOpacity(0.05),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 28.sp,
+                            color: AppColors.primarycolor.withOpacity(0.7),
                           ),
                         ),
-                      ),
-                    ],
-                  )
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.cloud_upload_outlined,
-                        size: 28.sp,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(height: 6.h),
-                      AppText(
-                        text: 'Tap to upload',
-                        fontSize: 12.sp,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ],
-                  ),
+                        SizedBox(height: 8.h),
+                        AppText(
+                          text: 'Upload $title',
+                          fontSize: 12.sp,
+                          color: AppColors.textDefaultSecondarycolor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        SizedBox(height: 4.h),
+                        AppText(
+                          text: 'JPG or PNG (max. 2MB)',
+                          fontSize: 10.sp,
+                          color: Colors.grey[400]!,
+                        ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildRemoveOverlay(VoidCallback? onRemove) {
+    return Positioned(
+      top: 8,
+      right: 8,
+      child: GestureDetector(
+        onTap: onRemove,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.6),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.delete_outline_rounded,
+            size: 18,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 
@@ -646,7 +651,7 @@ class _KycScreenState extends State<KycScreen> {
             _fieldLabel('Gender', required: true),
             DropdownButtonFormField<String>(
               dropdownColor: Colors.white,
-              value: _selectedGender,
+              initialValue: _selectedGender,
               decoration: _inputDecoration('Select gender'),
               style: TextStyle(
                 fontSize: 13.sp,
@@ -923,7 +928,7 @@ class _KycScreenState extends State<KycScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.offAll(() => const HomeScreen()),
         ),
         title: AppText(
           text: 'KYC Verification',
@@ -945,10 +950,11 @@ class _KycScreenState extends State<KycScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildKycStatusCard(),
-                  SizedBox(height: 16.h),
                   if (isSubmitted) ...[
+                    _buildKycStatusCard(),
+                    SizedBox(height: 16.h),
                     _buildSubmittedView(),
+                    const DeleteAccountButton(),
                   ] else ...[
                     _buildHeaderCard(),
                     SizedBox(height: 16.h),
@@ -1449,15 +1455,16 @@ class _KycScreenState extends State<KycScreen> {
   Widget _buildCard({required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: Colors.grey.withOpacity(0.05), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(4),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1494,55 +1501,77 @@ class _KycScreenState extends State<KycScreen> {
           statusLabel = 'NOT SUBMITTED';
       }
 
+      IconData statusIcon;
+      switch (status) {
+        case 'approved':
+          statusIcon = Icons.verified_user_rounded;
+          break;
+        case 'pending':
+          statusIcon = Icons.hourglass_top_rounded;
+          break;
+        case 'rejected':
+          statusIcon = Icons.error_rounded;
+          break;
+        default:
+          statusIcon = Icons.info_outline_rounded;
+      }
+
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(20.r),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.white.withOpacity(0.9)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(4),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: statusColor.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
+          border: Border.all(color: statusColor.withAlpha(40), width: 1),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            AppText(
-              text: 'KYC Status',
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textnaturalcolor,
+            Container(
+              padding: EdgeInsets.all(12.r),
+              decoration: BoxDecoration(
+                color: statusBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(statusIcon, color: statusColor, size: 28.sp),
             ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                AppText(
-                  text: 'Current Status: ',
-                  fontSize: 13.sp,
-                  color: AppColors.textDefaultSecondarycolor,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 3,
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AppText(
+                    text: 'KYC Verification',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textDefaultSecondarycolor,
                   ),
-                  decoration: BoxDecoration(
-                    color: statusBg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: AppText(
+                  SizedBox(height: 4.h),
+                  AppText(
                     text: statusLabel,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
                     color: statusColor,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            if (status == 'approved')
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.successMain,
+                size: 24,
+              ),
           ],
         ),
       );
@@ -1552,32 +1581,51 @@ class _KycScreenState extends State<KycScreen> {
   Widget _buildHeaderCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.primarycolor,
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(4),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.primarycolor.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppText(
-            text: 'Profile & KYC Details',
-            fontSize: 17.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textnaturalcolor,
-          ),
-          SizedBox(height: 4.h),
-          AppText(
-            text: 'Please fill in your details to verify your identity.',
-            fontSize: 13.sp,
-            color: AppColors.textDefaultSecondarycolor,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AppText(
+                      text: 'Complete Your KYC',
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                    SizedBox(height: 6.h),
+                    AppText(
+                      text:
+                          'Verify your identity to unlock all features and start earning.',
+                      fontSize: 12.sp,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Icon(
+                Icons.security_rounded,
+                color: Colors.white.withOpacity(0.3),
+                size: 50.sp,
+              ),
+            ],
           ),
         ],
       ),

@@ -5,6 +5,7 @@ import 'package:care_mall_affiliate/src/modules/auth/controller/auth_repo.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/controller/kyc_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Authentication Controller using GetX for state management
@@ -40,6 +41,11 @@ class AuthController extends GetxController {
       final savedToken = prefs.getString('auth_token');
       if (savedToken != null) {
         authToken.value = savedToken;
+        // Sync with GetStorage for DioInterceptor
+        final storage = GetStorage();
+        if (storage.read('token') == null) {
+          storage.write('token', savedToken);
+        }
       }
 
       // Load User Data (including KYC Status)
@@ -151,6 +157,7 @@ class AuthController extends GetxController {
           authToken.value = result['token'];
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', result['token']);
+          await GetStorage().write('token', result['token']);
         }
 
         TcSnackbar.success('Success', result['message']);
@@ -245,6 +252,8 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('user_data');
+    await GetStorage().remove('token');
+    await GetStorage().remove('user');
 
     // Clear KYC state if controller is registered
     try {
@@ -253,6 +262,32 @@ class AuthController extends GetxController {
       }
     } catch (e) {
       debugPrint("Error clearing KycController on logout: $e");
+    }
+  }
+
+  /// Deletes user account from server and logs out locally
+  Future<void> deleteAccount({
+    Function? onSuccess,
+    Function(String)? onError,
+  }) async {
+    isLoading.value = true;
+    try {
+      final result = await AuthRepo.deleteAccount();
+
+      if (result['success']) {
+        await logout();
+        if (onSuccess != null) onSuccess();
+        TcSnackbar.success('Success', result['message']);
+      } else {
+        if (onError != null) onError(result['message']);
+        TcSnackbar.error('Error', result['message']);
+      }
+    } catch (e) {
+      final errorMsg = 'Failed to delete account: ${e.toString()}';
+      if (onError != null) onError(errorMsg);
+      TcSnackbar.error('Error', errorMsg);
+    } finally {
+      isLoading.value = false;
     }
   }
 }
