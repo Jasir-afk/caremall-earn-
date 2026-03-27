@@ -5,7 +5,7 @@
   "packages": [
     {
       "name": "care_mall_affiliate",
-      "version": "1.0.0+13",
+      "version": "1.0.0+15",
       "dependencies": [
         "app_links",
         "connectivity_plus",
