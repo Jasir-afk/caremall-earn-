@@ -17,13 +17,16 @@ class TcSnackbar {
 
   static void error(String title, String message) {
     final msg = message.toLowerCase();
-    final isNetwork =
+    // Only show "No Connection" for genuine OS-level socket/connectivity errors.
+    // Do NOT trigger for server-returned messages that contain the word 'network'.
+    final isNetworkError =
         msg.contains('socketexception') ||
         msg.contains('failed host lookup') ||
-        msg.contains('network error') ||
-        msg.contains('clientexception');
+        msg.contains('clientexception') ||
+        msg.contains('no internet connection') ||
+        msg == 'connectionerror';
 
-    if (isNetwork) {
+    if (isNetworkError) {
       noInternet();
     } else {
       _show(title: title, message: message, type: _SnackType.error);

@@ -38,7 +38,7 @@ class EarningRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -73,7 +73,7 @@ class EarningRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 }

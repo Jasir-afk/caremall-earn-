@@ -35,7 +35,7 @@ class DashboardRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -75,7 +75,7 @@ class DashboardRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -112,7 +112,7 @@ class DashboardRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -150,7 +150,7 @@ class DashboardRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -184,7 +184,7 @@ class DashboardRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 }

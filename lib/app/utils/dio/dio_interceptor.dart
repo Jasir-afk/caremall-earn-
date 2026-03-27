@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:get_storage/get_storage.dart';
@@ -15,17 +14,6 @@ class DioInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    bool isConnected = await _checkNetwork();
-    if (!isConnected) {
-      return handler.reject(
-        DioException(
-          requestOptions: options,
-          type: DioExceptionType.connectionError,
-          error: 'No internet connection. Please check your network.',
-        ),
-      );
-    }
-
     final token = _storage.read<String>('token');
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -108,10 +96,5 @@ class DioInterceptor extends Interceptor {
     }
 
     return await dio.fetch(requestOptions);
-  }
-
-  Future<bool> _checkNetwork() async {
-    final result = await Connectivity().checkConnectivity();
-    return result.first != ConnectivityResult.none;
   }
 }

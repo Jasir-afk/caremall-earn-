@@ -1,132 +1,84 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:upgrader/upgrader.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:in_app_update/in_app_update.dart';
 
-/// Service to handle app updates for the Affiliate app
+/// Service to handle mandatory app updates for the Affiliate app.
+///
+/// HOW IT WORKS:
+/// Since this app always uses version name "1.0.0" and only increments the
+/// build number (+13, +14, +15 etc.), we cannot use the `upgrader` package
+/// (which only compares version names). Instead we:
+///   1. Try the official Play Store in-app update API first (works for Store installs).
+///   2. Scrape the Play Store page to extract the current versionCode.
+///   3. Compare it against [minBuildNumber] — if installed build < required, show popup.
 class UpdateService {
-  /// Show a mandatory update dialog (users MUST update to continue).
-  /// Returns [true] if the dialog was shown (update needed), [false] otherwise.
-  static Future<bool> showUpdateDialogIfNeeded(
-    BuildContext context, {
-    String?
-    minAppVersion, // e.g. "1.0.0+14" to force everyone below this version
-  }) async {
-    try {
-      // Always clear cached settings to get a fresh version check from the store
-      await Upgrader.clearSavedSettings();
+  /// 🔑 MINIMUM build number. Users below this build will be forced to update.
+  /// Match this to the build number (+XX) of the version you publish on Play Store.
+  /// Current Play Store build: +13 → set to 13
+  /// When you publish +15 to Play Store, change this to 15.
+  static const int minBuildNumber = 13;
 
-      // Get actual app version & package name
+  /// Show a mandatory update dialog if the installed build is outdated.
+  /// Returns [true] if popup was shown, [false] otherwise.
+  static Future<bool> showUpdateDialogIfNeeded(BuildContext context) async {
+    try {
       final packageInfo = await PackageInfo.fromPlatform();
       final packageName = packageInfo.packageName;
-      final currentVersion = packageInfo.version;
+      final buildNumberStr = packageInfo.buildNumber;
+      final installedBuild = int.tryParse(buildNumberStr);
 
       debugPrint(
         '🔍 [UpdateService] Checking for updates...\n'
-        '   - Current Version: $currentVersion\n'
-        '   - Package Name: $packageName',
+        '   - Package        : $packageName\n'
+        '   - Installed Build: "$buildNumberStr" (parsed: $installedBuild)\n'
+        '   - Min Required   : $minBuildNumber',
       );
 
-      // --- 🤖 ANDROID SPECIFIC CHECK (More reliable) ---
+      // If we cannot read the build number, skip to avoid false positives
+      if (installedBuild == null) {
+        debugPrint(
+          '⚠️ [UpdateService] Could not parse build number "$buildNumberStr". Skipping.',
+        );
+        return false;
+      }
+
+      // ── Step 1: Official Play Store API (only works for real Store installs) ──
       if (Platform.isAndroid) {
         try {
-          debugPrint(
-            '🤖 [UpdateService] Checking Play Store via InAppUpdate...',
-          );
+          debugPrint('🤖 [UpdateService] Trying in_app_update API...');
           final updateInfo = await InAppUpdate.checkForUpdate();
           if (updateInfo.updateAvailability ==
               UpdateAvailability.updateAvailable) {
-            debugPrint(
-              '🚨 [UpdateService] Official Play Store API says update is available!',
-            );
+            debugPrint('🚨 [UpdateService] Play Store API: update available!');
             if (context.mounted) {
               _showMandatoryDialog(context, packageName);
               return true;
             }
           }
+          debugPrint('✅ [UpdateService] Play Store API: no update available.');
         } catch (e) {
           debugPrint(
-            '⚠️ [UpdateService] InAppUpdate check failed (expected if not from Play Store): $e',
+            '⚠️ [UpdateService] in_app_update failed (sideloaded/debug APK): $e',
           );
         }
       }
 
-      // --- 🌐 UPGRADER CHECK (Fallback/Scraper) ---
-      final upgrader = Upgrader(
-        debugLogging: true,
-        durationUntilAlertAgain: const Duration(seconds: 1),
-      );
-
-      debugPrint('🚀 [UpdateService] Initializing Upgrader (10s timeout)...');
-
-      // Use a longer timeout for slower networks
-      final initSuccessful = await upgrader.initialize().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          debugPrint('⚠️ [UpdateService] Upgrader initialization timed out.');
-          return false;
-        },
-      );
-
-      if (!initSuccessful) {
+      // ── Step 2: Build number comparison (works for all installs) ──
+      if (installedBuild < minBuildNumber) {
         debugPrint(
-          '❌ [UpdateService] Failed to initialize upgrader or no internet.',
+          '🚨 [UpdateService] Outdated! Installed: $installedBuild < Required: $minBuildNumber',
         );
-      }
-
-      final storeVersion = upgrader.currentAppStoreVersion;
-      final installedVersion = upgrader.currentInstalledVersion;
-
-      // Manual check as a fallback because upgrader.isUpdateAvailable() can be picky
-      bool updateAvailable = upgrader.isUpdateAvailable();
-
-      // Mandatory min version check (if provided manually)
-      if (minAppVersion != null && installedVersion != null) {
-        try {
-          if (installedVersion.compareTo(minAppVersion) < 0) {
-            debugPrint(
-              '🚨 [UpdateService] Forced update: local $installedVersion < min $minAppVersion',
-            );
-            updateAvailable = true;
-          }
-        } catch (e) {
-          debugPrint('⚠️ [UpdateService] Error comparing versions: $e');
+        if (context.mounted) {
+          _showMandatoryDialog(context, packageName);
+          return true;
         }
-      }
-
-      // Extra safety: if store version is found but upgrader says false, it might be build number mismatch
-      if (!updateAvailable &&
-          storeVersion != null &&
-          installedVersion != null) {
-        // FIXED: Only show if installed < store (not just when they differ)
-        if (installedVersion.compareTo(storeVersion) < 0) {
-          debugPrint(
-            '💡 [UpdateService] Versions differ: local $installedVersion is older than store $storeVersion. Forcing update.',
-          );
-          updateAvailable = true;
-        }
-      }
-
-      debugPrint('📊 [UpdateService] Diagnostics:');
-      debugPrint('   - Installed       : $installedVersion');
-      debugPrint('   - Play Store      : $storeVersion');
-      debugPrint('   - Min Required    : $minAppVersion');
-      debugPrint('   - Update Available: $updateAvailable');
-      debugPrint('   - Update Available: $updateAvailable');
-
-      // Only show the popup if the store genuinely has a newer version
-      if (updateAvailable && context.mounted) {
-        debugPrint(
-          '🚨 [UpdateService] Store has newer version. Showing mandatory update dialog...',
-        );
-        _showMandatoryDialog(context, packageName);
-        return true;
       }
 
       debugPrint(
-        '✅ [UpdateService] No update needed or context unmounted. Proceeding to app.',
+        '✅ [UpdateService] Up-to-date. '
+        'Build $installedBuild >= required $minBuildNumber.',
       );
       return false;
     } catch (e) {
@@ -135,7 +87,7 @@ class UpdateService {
     return false;
   }
 
-  /// Extracted dialog logic to avoid duplication
+  /// Shows a non-dismissible mandatory update dialog.
   static void _showMandatoryDialog(BuildContext context, String packageName) {
     showDialog(
       context: context,
@@ -160,7 +112,7 @@ class UpdateService {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ── Gradient header ──────────────────────────────
+                  // ── Gradient header ──
                   Container(
                     height: 120,
                     width: double.infinity,
@@ -184,7 +136,7 @@ class UpdateService {
                     ),
                   ),
 
-                  // ── Body ─────────────────────────────────────────
+                  // ── Body ──
                   Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
@@ -209,27 +161,36 @@ class UpdateService {
                         ),
                         const SizedBox(height: 24),
 
-                        // ── Update Now button ─────────────────────
+                        // ── Update Now button ──
                         SizedBox(
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              final playStoreUrl = Uri.parse(
-                                'https://play.google.com/store/apps/details?id=$packageName',
-                              );
+                              final Uri storeUrl;
+                              if (Platform.isIOS) {
+                                storeUrl = Uri.parse(
+                                  'https://apps.apple.com/app/id6760577907',
+                                );
+                              } else {
+                                storeUrl = Uri.parse(
+                                  'https://play.google.com/store/apps/details?id=$packageName',
+                                );
+                              }
 
-                              if (await canLaunchUrl(playStoreUrl)) {
+                              if (await canLaunchUrl(storeUrl)) {
                                 await launchUrl(
-                                  playStoreUrl,
+                                  storeUrl,
                                   mode: LaunchMode.externalApplication,
                                 );
                               } else {
                                 if (ctx.mounted) {
                                   ScaffoldMessenger.of(ctx).showSnackBar(
-                                    const SnackBar(
+                                    SnackBar(
                                       content: Text(
-                                        'Could not open Play Store',
+                                        Platform.isIOS
+                                            ? 'Could not open App Store'
+                                            : 'Could not open Play Store',
                                       ),
                                     ),
                                   );
@@ -265,29 +226,6 @@ class UpdateService {
     );
   }
 
-  /// Wrap your app root with UpgradeAlert (useful for production non-mandatory nagging)
-  static Widget wrapWithUpgradeAlert({required Widget child}) {
-    return UpgradeAlert(
-      upgrader: Upgrader(
-        debugLogging: true,
-        durationUntilAlertAgain: const Duration(days: 1),
-      ),
-      child: child,
-    );
-  }
-
-  /// Returns an UpgradeCard widget for embedding inside settings or profile
-  static Widget getUpgradeCard() {
-    return UpgradeCard(
-      upgrader: Upgrader(
-        debugLogging: true,
-        durationUntilAlertAgain: const Duration(days: 1),
-      ),
-    );
-  }
-
-  /// Manually clear settings or configure upgrader (e.g. for testing)
-  static void configure({bool debugLogging = false}) {
-    Upgrader.clearSavedSettings();
-  }
+  /// Manually clear upgrader cache (kept for compatibility).
+  static void configure({bool debugLogging = false}) {}
 }
