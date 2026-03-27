@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:upgrader/upgrader.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Service to handle app updates for the Affiliate app
 class UpdateService {
+  /// iOS App Store ID for Care Mall Earn+
+  static const String iosAppStoreId = '6760577907';
+
   /// Show a mandatory update dialog (users MUST update to continue).
   /// Returns [true] if the dialog was shown (update needed), [false] otherwise.
   static Future<bool> showUpdateDialogIfNeeded(
@@ -36,7 +40,7 @@ class UpdateService {
       );
 
       debugPrint('🚀 [UpdateService] Initializing Upgrader (10s timeout)...');
-      
+
       // Use a longer timeout for slower networks
       final initSuccessful = await upgrader.initialize().timeout(
         const Duration(seconds: 10),
@@ -47,33 +51,41 @@ class UpdateService {
       );
 
       if (!initSuccessful) {
-        debugPrint('❌ [UpdateService] Failed to initialize upgrader or no internet.');
+        debugPrint(
+          '❌ [UpdateService] Failed to initialize upgrader or no internet.',
+        );
       }
 
       final storeVersion = upgrader.currentAppStoreVersion;
       final installedVersion = upgrader.currentInstalledVersion;
-      
+
       // Manual check as a fallback because upgrader.isUpdateAvailable() can be picky
       bool updateAvailable = upgrader.isUpdateAvailable();
-      
+
       // Mandatory min version check (if provided manually)
       if (minAppVersion != null && installedVersion != null) {
         try {
           // A very basic comparison; for more complex ones use Version.parse()
           if (installedVersion.compareTo(minAppVersion) < 0) {
-             debugPrint('🚨 [UpdateService] Forced update: local $installedVersion is older than min $minAppVersion');
-             updateAvailable = true;
+            debugPrint(
+              '🚨 [UpdateService] Forced update: local $installedVersion is older than min $minAppVersion',
+            );
+            updateAvailable = true;
           }
         } catch (e) {
           debugPrint('⚠️ [UpdateService] Error comparing versions: $e');
         }
       }
-      
+
       // Extra safety: if store version is found but upgrader says false, it might be build number mismatch
-      if (!updateAvailable && storeVersion != null && installedVersion != null) {
+      if (!updateAvailable &&
+          storeVersion != null &&
+          installedVersion != null) {
         if (storeVersion != installedVersion) {
-           debugPrint('💡 [UpdateService] Versions differ ($installedVersion vs $storeVersion) but upgrader says no update. Overriding.');
-           updateAvailable = true;
+          debugPrint(
+            '💡 [UpdateService] Versions differ ($installedVersion vs $storeVersion) but upgrader says no update. Overriding.',
+          );
+          updateAvailable = true;
         }
       }
 
@@ -156,7 +168,7 @@ class UpdateService {
                             ),
                             const SizedBox(height: 12),
                             const Text(
-                              'A new version of the Care Mall Affiliate app is available with important fixes and exciting new features. Please update to continue.',
+                              'A new version of Care Mall Earn+ is available with important fixes and exciting new features. Please update to continue.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 15,
@@ -172,21 +184,31 @@ class UpdateService {
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  final playStoreUrl = Uri.parse(
-                                    'https://play.google.com/store/apps/details?id=$packageName',
-                                  );
+                                  final Uri storeUrl;
+                                  final String storeName;
+                                  if (Platform.isIOS) {
+                                    storeUrl = Uri.parse(
+                                      'https://apps.apple.com/app/id$iosAppStoreId',
+                                    );
+                                    storeName = 'App Store';
+                                  } else {
+                                    storeUrl = Uri.parse(
+                                      'https://play.google.com/store/apps/details?id=$packageName',
+                                    );
+                                    storeName = 'Play Store';
+                                  }
 
-                                  if (await canLaunchUrl(playStoreUrl)) {
+                                  if (await canLaunchUrl(storeUrl)) {
                                     await launchUrl(
-                                      playStoreUrl,
+                                      storeUrl,
                                       mode: LaunchMode.externalApplication,
                                     );
                                   } else {
                                     if (ctx.mounted) {
                                       ScaffoldMessenger.of(ctx).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Could not open Play Store',
+                                            'Could not open $storeName',
                                           ),
                                         ),
                                       );
@@ -252,5 +274,13 @@ class UpdateService {
   /// Manually clear settings or configure upgrader (e.g. for testing)
   static void configure({bool debugLogging = false}) {
     Upgrader.clearSavedSettings();
+  }
+
+  /// Optional compatibility method matching test dialog naming.
+  static Future<bool> showTestUpdateDialog(
+    BuildContext context, {
+    bool force = false,
+  }) {
+    return showUpdateDialogIfNeeded(context, force: force);
   }
 }
