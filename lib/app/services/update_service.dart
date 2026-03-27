@@ -200,19 +200,22 @@ class UpdateService {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              final Uri storeUrl = Platform.isIOS
-                                  ? Uri.parse(
-                                      'https://apps.apple.com/in/app/care-mall-earn/id6760577907',
-                                    )
-                                  : Uri.parse(
-                                      'https://play.google.com/store/apps/details?id=$packageName',
-                                    );
-                              final String storeName =
-                                  Platform.isIOS ? 'App Store' : 'Play Store';
+                              Uri updateUrl;
+                              if (Platform.isIOS) {
+                                // iOS App Store Link
+                                updateUrl = Uri.parse(
+                                  'https://apps.apple.com/app/id$iosAppStoreId',
+                                );
+                              } else {
+                                // Android Play Store Link
+                                updateUrl = Uri.parse(
+                                  'https://play.google.com/store/apps/details?id=$packageName',
+                                );
+                              }
 
-                              if (await canLaunchUrl(storeUrl)) {
+                              if (await canLaunchUrl(updateUrl)) {
                                 await launchUrl(
-                                  storeUrl,
+                                  updateUrl,
                                   mode: LaunchMode.externalApplication,
                                 );
                               } else {
@@ -220,7 +223,7 @@ class UpdateService {
                                   ScaffoldMessenger.of(ctx).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Could not open $storeName',
+                                        'Could not open ${Platform.isIOS ? 'App Store' : 'Play Store'}',
                                       ),
                                     ),
                                   );
