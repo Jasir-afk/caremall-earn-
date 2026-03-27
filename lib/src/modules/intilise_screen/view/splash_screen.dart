@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // Set minAppVersion to "1.0.0+13" (higher than current 1.0.0+10) to test
       final updateRequired = await UpdateService.showUpdateDialogIfNeeded(
         context,
-        force: false,
+        force: true, // 🚨 Temporarily set to TRUE to see the popup
         // minAppVersion is now null so it only checks Play Store versions
       );
 
