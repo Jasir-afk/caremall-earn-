@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:care_mall_affiliate/app/app_buttons/app_buttons.dart';
 import 'package:care_mall_affiliate/app/commenwidget/app_snackbar.dart';
 import 'package:care_mall_affiliate/app/commenwidget/apptext.dart';
@@ -81,7 +83,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             );
           } else {
-            TcSnackbar.error('Error', result['message']);
+            Get.snackbar(
+              'Error',
+              result['message'],
+              backgroundColor: const Color.fromARGB(255, 116, 22, 22),
+              colorText: Colors.white,
+            );
+            //log(result['message']);
           }
         }
       } catch (e) {
