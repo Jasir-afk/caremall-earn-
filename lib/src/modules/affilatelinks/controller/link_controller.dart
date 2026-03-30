@@ -17,6 +17,7 @@ class CreateLinkController extends GetxController {
   final isLoading = false.obs;
   final isGenerating = false.obs;
   final searchQuery = ''.obs;
+  late final TextEditingController searchTextController;
   final currentPage = 1.obs;
   final itemsPerPage = 10;
 
@@ -65,12 +66,14 @@ class CreateLinkController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    searchTextController = TextEditingController();
     scrollController.addListener(_onScroll);
     loadData();
   }
 
   @override
   void onClose() {
+    searchTextController.dispose();
     scrollController.dispose();
     super.onClose();
   }
@@ -235,6 +238,7 @@ class CreateLinkController extends GetxController {
 
   void clearSearch() {
     searchQuery.value = '';
+    searchTextController.clear();
     currentPage.value = 1;
     currentPageProducts.value = 1;
     hasMoreProducts.value = true;
@@ -246,6 +250,7 @@ class CreateLinkController extends GetxController {
   void resetPagination() {
     if (currentPageProducts.value > 1 || searchQuery.value.isNotEmpty) {
       searchQuery.value = '';
+      searchTextController.clear();
       currentPageProducts.value = 1;
       hasMoreProducts.value = true;
       if (products.length > 10) {
@@ -257,6 +262,9 @@ class CreateLinkController extends GetxController {
 
   void searchProducts(String query) {
     searchQuery.value = query;
+    if (searchTextController.text != query) {
+      searchTextController.text = query;
+    }
     currentPage.value = 1;
     currentPageProducts.value = 1;
     hasMoreProducts.value = true;

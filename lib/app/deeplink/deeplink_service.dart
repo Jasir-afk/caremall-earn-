@@ -38,9 +38,9 @@ class DeepLinkService {
     debugPrint('DeepLinkService: Host: ${uri.host}');
     debugPrint('DeepLinkService: Path: ${uri.path}');
 
-    // Only handle HTTPS links to caremallonline.com/product/...
-    // caremall:// scheme belongs to the CareMall customer app — not intercepted here.
-    final bool isCorrectHost = uri.host.contains('caremallonline.com');
+    // Only handle links specifically for affiliates (affiliate.caremallonline.com)
+    // Main domain product links should be handled by the Customer app or Browser.
+    final bool isCorrectHost = uri.host == 'affiliate.caremallonline.com';
     final bool isProductPath =
         uri.pathSegments.isNotEmpty &&
         (uri.pathSegments[0] == 'product' ||

@@ -43,7 +43,7 @@ class ProductSharingService {
     String priceText = '';
     if (mrp != null && sellingPrice != null && mrp > sellingPrice) {
       priceText =
-          '\nProduct Price: ₹${mrp % 1 == 0 ? mrp.toInt().toString() : mrp.toStringAsFixed(2)}';
+          '\nMRP: ₹${mrp % 1 == 0 ? mrp.toInt().toString() : mrp.toStringAsFixed(2)}\nOffer Price: ₹${sellingPrice % 1 == 0 ? sellingPrice.toInt().toString() : sellingPrice.toStringAsFixed(2)}';
     } else if (sellingPrice != null) {
       priceText =
           '\nPrice: ₹${sellingPrice % 1 == 0 ? sellingPrice.toInt().toString() : sellingPrice.toStringAsFixed(2)}';

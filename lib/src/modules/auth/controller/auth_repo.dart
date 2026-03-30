@@ -1,5 +1,6 @@
 import 'package:care_mall_affiliate/app/utils/dio/dio_client.dart';
 import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 /// Repository class for authentication-related API calls
@@ -37,7 +38,7 @@ class AuthRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': _extractErrorMessage(e)};
     }
   }
 
@@ -78,7 +79,7 @@ class AuthRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': _extractErrorMessage(e)};
     }
   }
 
@@ -104,7 +105,27 @@ class AuthRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': _extractErrorMessage(e)};
     }
+  }
+
+  /// Extracts the real server error message from a DioException or String.
+  /// DioClient converts DioExceptions to Strings via DioExceptionHandler,
+  /// so we receive a String like "Phone number already registered."
+  static String _extractErrorMessage(dynamic e) {
+    // DioClient throws a String (from DioExceptionHandler.handleException)
+    if (e is String) return e;
+    // For DioException (if thrown directly without going through DioClient)
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map) {
+        return data['message']?.toString() ??
+            data['msg']?.toString() ??
+            data['error']?.toString() ??
+            'Something went wrong.';
+      }
+      return e.message ?? 'Something went wrong.';
+    }
+    return e.toString();
   }
 }
