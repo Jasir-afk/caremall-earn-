@@ -63,9 +63,12 @@ class ProductLinkModel {
             productData['landingSellPrice']?.toString() ??
                 productData['landingsellprice']?.toString() ??
                 productData['landing_sell_price']?.toString() ??
-                productData['defaultVariant']?['landingSellPrice']?.toString() ??
-                productData['defaultVariant']?['landingsellprice']?.toString() ??
-                productData['defaultVariant']?['landing_sell_price']?.toString() ??
+                productData['defaultVariant']?['landingSellPrice']
+                    ?.toString() ??
+                productData['defaultVariant']?['landingsellprice']
+                    ?.toString() ??
+                productData['defaultVariant']?['landing_sell_price']
+                    ?.toString() ??
                 productData['sellingPrice']?.toString() ??
                 productData['salePrice']?.toString() ??
                 productData['price']?.toString() ??

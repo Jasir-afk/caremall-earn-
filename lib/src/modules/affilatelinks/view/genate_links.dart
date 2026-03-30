@@ -57,6 +57,7 @@ class GenerateLinksScreen extends GetView<CreateLinkController> {
                   ],
                 ),
                 child: TextField(
+                  controller: controller.searchTextController,
                   onChanged: (value) => controller.searchProducts(value),
                   decoration: InputDecoration(
                     hintText: 'Search products by name...',
