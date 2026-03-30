@@ -9,6 +9,8 @@ import 'package:in_app_update/in_app_update.dart';
 class UpdateService {
   // ─── Configuration ───
   static const int minBuildNumber = 14;
+  // Trigger update if installed semantic version is less than this.
+  static const String minAppVersion = '1.2.0';
   static const String appleAppId = '6760577907';
   // ─── Public Methods ───
   /// Checks if an update is required and shows a non-dismissible popup if so.
@@ -18,8 +20,9 @@ class UpdateService {
       final packageInfo = await PackageInfo.fromPlatform();
       final packageName = packageInfo.packageName;
       final installedBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
+      final installedVersion = packageInfo.version;
 
-      _logStatus(packageName, installedBuild);
+      _logStatus(packageName, installedBuild, installedVersion);
       // Step 1: Try Official Play Store API (Android only)
       if (Platform.isAndroid) {
         final storeUpdate = await _checkPlayStoreAPI();
@@ -28,8 +31,14 @@ class UpdateService {
           return true;
         }
       }
-      // Step 2: Fallback manual build-number check
-      if (installedBuild < minBuildNumber) {
+      // Step 2: Fallback manual checks (version and build)
+      final isVersionOutdated = _isInstalledVersionLess(
+        installedVersion,
+        minAppVersion,
+      );
+      final isBuildOutdatedOnAndroid =
+          Platform.isAndroid && installedBuild < minBuildNumber;
+      if (isVersionOutdated || isBuildOutdatedOnAndroid) {
         if (context.mounted) {
           _triggerPopup(context, packageName);
           return true;
@@ -44,13 +53,42 @@ class UpdateService {
 
   // ─── Internal Logic ───
 
-  static void _logStatus(String pkg, int build) {
+  static void _logStatus(String pkg, int build, String version) {
     debugPrint(
       '🔍 [UpdateService] Status:\n'
       '   - Package: $pkg\n'
       '   - Installed: $build\n'
-      '   - Required: $minBuildNumber',
+      '   - Installed version: $version\n'
+      '   - Required version: $minAppVersion\n'
+      '   - Required build: $minBuildNumber',
     );
+  }
+
+  static bool _isInstalledVersionLess(
+    String installed,
+    String required,
+  ) {
+    try {
+      final installedParts =
+          installed.split('.').map((e) => int.parse(e)).toList();
+      final requiredParts =
+          required.split('.').map((e) => int.parse(e)).toList();
+
+      final maxLen = installedParts.length > requiredParts.length
+          ? installedParts.length
+          : requiredParts.length;
+
+      for (var i = 0; i < maxLen; i++) {
+        final a = i < installedParts.length ? installedParts[i] : 0;
+        final b = i < requiredParts.length ? requiredParts[i] : 0;
+        if (a == b) continue;
+        return a < b;
+      }
+      return false;
+    } catch (_) {
+      // If parsing fails, don't block users due to bad version format.
+      return false;
+    }
   }
 
   static Future<bool> _checkPlayStoreAPI() async {
@@ -139,7 +177,7 @@ class _MandatoryUpdateDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            'A new version of the Care Mall Affiliate app is available. Please update to continue.',
+            'A new version of the Care Mall Earn+ app is available. Please update to continue.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey, height: 1.5),
           ),
@@ -169,12 +207,26 @@ class _MandatoryUpdateDialog extends StatelessWidget {
 
   Future<void> _launchStore() async {
     final url = Platform.isIOS
-        ? 'https://apps.apple.com/app/id${UpdateService.appleAppId}'
+        ? 'https://apps.apple.com/in/app/care-mall-earn/id${UpdateService.appleAppId}'
         : 'https://play.google.com/store/apps/details?id=$packageName';
 
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Update',
+          'Could not open the store link',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (_) {
+      Get.snackbar(
+        'Update',
+        'Could not open the store link',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 }
