@@ -1,16 +1,18 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:http/http.dart' as http;
 
 /// Service to handle mandatory app updates for the Affiliate app.
 class UpdateService {
   // ─── Configuration ───
   static const int minBuildNumber = 14;
   // Trigger update if installed semantic version is less than this.
-  static const String minAppVersion = '1.2.0';
+  static const String minAppVersion = '1.0.0';
   static const String appleAppId = '6760577907';
   // ─── Public Methods ───
   /// Checks if an update is required and shows a non-dismissible popup if so.
@@ -19,31 +21,33 @@ class UpdateService {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final packageName = packageInfo.packageName;
-      final installedBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
       final installedVersion = packageInfo.version;
+      final installedBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
 
-      _logStatus(packageName, installedBuild, installedVersion);
-      // Step 1: Try Official Play Store API (Android only)
+      // Step 1: Dynamic check against App Stores
+      bool updateAvailable = false;
+
       if (Platform.isAndroid) {
-        final storeUpdate = await _checkPlayStoreAPI();
-        if (storeUpdate && context.mounted) {
-          _triggerPopup(context, packageName);
-          return true;
-        }
+        updateAvailable = await _checkPlayStoreAPI();
+      } else if (Platform.isIOS) {
+        updateAvailable = await _checkAppStoreAPI(installedVersion);
       }
-      // Step 2: Fallback manual checks (version and build)
-      final isVersionOutdated = _isInstalledVersionLess(
-        installedVersion,
-        minAppVersion,
-      );
-      final isBuildOutdatedOnAndroid =
-          Platform.isAndroid && installedBuild < minBuildNumber;
-      if (isVersionOutdated || isBuildOutdatedOnAndroid) {
+
+      // Step 2: Trigger popup if update is found
+      if (updateAvailable) {
+        _logStatus(
+          packageName,
+          installedBuild,
+          installedVersion,
+          "Update Required",
+        );
         if (context.mounted) {
           _triggerPopup(context, packageName);
           return true;
         }
       }
+
+      _logStatus(packageName, installedBuild, installedVersion, "Up to date");
       return false;
     } catch (e) {
       debugPrint('❌ [UpdateService] Error: $e');
@@ -53,26 +57,24 @@ class UpdateService {
 
   // ─── Internal Logic ───
 
-  static void _logStatus(String pkg, int build, String version) {
+  static void _logStatus(String pkg, int build, String version, String status) {
     debugPrint(
-      '🔍 [UpdateService] Status:\n'
+      '🔍 [UpdateService] Status: $status\n'
       '   - Package: $pkg\n'
-      '   - Installed: $build\n'
-      '   - Installed version: $version\n'
-      '   - Required version: $minAppVersion\n'
-      '   - Required build: $minBuildNumber',
+      '   - Installed: $version (Build $build)',
     );
   }
 
-  static bool _isInstalledVersionLess(
-    String installed,
-    String required,
-  ) {
+  static bool _isInstalledVersionLess(String installed, String required) {
     try {
-      final installedParts =
-          installed.split('.').map((e) => int.parse(e)).toList();
-      final requiredParts =
-          required.split('.').map((e) => int.parse(e)).toList();
+      final installedParts = installed
+          .split('.')
+          .map((e) => int.parse(e))
+          .toList();
+      final requiredParts = required
+          .split('.')
+          .map((e) => int.parse(e))
+          .toList();
 
       final maxLen = installedParts.length > requiredParts.length
           ? installedParts.length
@@ -101,6 +103,27 @@ class UpdateService {
       debugPrint('⚠️ [UpdateService] Play Store API failure: $e');
       return false;
     }
+  }
+
+  static Future<bool> _checkAppStoreAPI(String installedVersion) async {
+    try {
+      final url =
+          'https://itunes.apple.com/lookup?id=$appleAppId&country=in&t=${DateTime.now().millisecondsSinceEpoch}';
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['results'] != null && data['results'].isNotEmpty) {
+          final storeVersion = data['results'][0]['version'];
+          return _isInstalledVersionLess(installedVersion, storeVersion);
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [UpdateService] App Store API failure: $e');
+    }
+    return false;
   }
 
   static void _triggerPopup(BuildContext context, String packageName) async {

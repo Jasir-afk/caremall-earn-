@@ -131,6 +131,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               phone: phoneVal,
               kyc: kycStatusStr,
             );
+            authCtrl.authToken.value = result['token'] ?? '';
           }
 
           final authCtrl = Get.find<AuthController>();

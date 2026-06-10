@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:care_mall_affiliate/app/commenwidget/app_snackbar.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_repo.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/controller/kyc_controller.dart';
+import 'package:care_mall_affiliate/src/modules/intilise_screen/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -39,6 +40,7 @@ class AuthController extends GetxController {
 
       // Load Token
       final savedToken = prefs.getString('auth_token');
+
       if (savedToken != null) {
         authToken.value = savedToken;
         // Sync with GetStorage for DioInterceptor
@@ -47,6 +49,7 @@ class AuthController extends GetxController {
           storage.write('token', savedToken);
         }
       }
+
 
       // Load User Data (including KYC Status)
       final savedUserData = prefs.getString('user_data');
@@ -240,7 +243,7 @@ class AuthController extends GetxController {
   }
 
   /// Clears all authentication data
-  Future<void> logout() async {
+  Future<void> logout({bool sessionExpired = false}) async {
     phoneNumber.value = '';
     userName.value = '';
     userEmail.value = '';
@@ -252,8 +255,9 @@ class AuthController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('user_data');
-    await GetStorage().remove('token');
-    await GetStorage().remove('user');
+    final storage = GetStorage();
+    await storage.remove('token');
+    await storage.remove('user');
 
     // Clear KYC state if controller is registered
     try {
@@ -263,6 +267,9 @@ class AuthController extends GetxController {
     } catch (e) {
       debugPrint("Error clearing KycController on logout: $e");
     }
+
+    // Redirect to Splash Screen (which will then go to Login because token is empty)
+    Get.offAll(() => const SplashScreen());
   }
 
   /// Deletes user account from server and logs out locally

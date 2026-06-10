@@ -59,6 +59,7 @@ class AuthRepo {
       if (response.statusCode == 200 || response.statusCode == 201) {
         // Handle token potentially being nested
         String? token = responseData['token'];
+
         if (token == null && responseData['data'] is Map) {
           token = responseData['data']['token'];
         }

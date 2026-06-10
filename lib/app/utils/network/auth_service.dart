@@ -2,6 +2,7 @@ import 'package:care_mall_affiliate/app/utils/dio/dio_client.dart';
 import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 import 'dart:convert';
 
 class AuthService {
@@ -17,12 +18,7 @@ class AuthService {
     try {
       final response = await _dio.post(
         Apiurls.sendOtp,
-        body: {
-          'phone': phone,
-          'mode': mode,
-          'name': name,
-          'email': email,
-        },
+        body: {'phone': phone, 'mode': mode, 'name': name, 'email': email},
       );
 
       final responseData = response.data;
@@ -86,7 +82,10 @@ class AuthService {
         if (token != null && token.isNotEmpty) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
-          print("Token successfully saved to SharedPreferences: $token");
+          await GetStorage().write('token', token);
+          print(
+            "Token successfully saved to SharedPreferences and GetStorage: $token",
+          );
 
           // Also save user data if needed
           if (responseData['user'] != null) {

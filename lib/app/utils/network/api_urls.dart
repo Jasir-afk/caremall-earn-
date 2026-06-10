@@ -1,7 +1,7 @@
 class Apiurls {
   // Base URL
-  // static const String baseUrl =
-  //     'https://test.affiliate.api.caremallonline.com'; // test
+  //   static const String baseUrl =
+  //       'https://test.affiliate.api.caremallonline.com'; // test
   static const String baseUrl =
       'https://affiliate.api.caremallonline.com'; // live
 
@@ -26,6 +26,7 @@ class Apiurls {
   static const String linksStats = '$baseUrl/api/v1/affiliate/links/stats';
   static const String returnOrders = '$baseUrl/api/v1/affiliate/orders/returns';
   static const String payouts = '$baseUrl/api/v1/affiliate/payouts';
+  static const String uploadImage = '$baseUrl/api/v1/affiliate/upload/image';
   static const String deleteAccount =
       '$baseUrl/api/v1/affiliate/auth/delete-account';
 }
