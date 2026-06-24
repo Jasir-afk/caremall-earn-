@@ -1,8 +1,4 @@
-import 'package:care_mall_affiliate/app/commenwidget/app_snackbar.dart';
-import 'package:care_mall_affiliate/src/modules/intilise_screen/view/splash_screen.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class DioExceptionHandler {
   static String handleException(dynamic error) {
@@ -35,7 +31,6 @@ class DioExceptionHandler {
     final data = error.response?.data;
 
     if (statusCode == 401) {
-      handleUnauthorized();
       return "🔑 Session expired. Please login again.";
     }
 
@@ -87,10 +82,3 @@ class DioExceptionHandler {
   }
 }
 
-Future<void> handleUnauthorized() async {
-  final storage = GetStorage();
-  await storage.remove('token');
-  await storage.remove('user');
-  Get.offAll(() => const SplashScreen());
-  TcSnackbar.error('Session Expired', 'Please log in again.');
-}

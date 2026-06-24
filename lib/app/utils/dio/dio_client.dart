@@ -123,12 +123,14 @@ class DioClient {
   Future<Response> postMultipart(
     String endpoint, {
     required Map<String, dynamic> data,
+    Map<String, dynamic>? queryParams,
     CancelToken? cancelToken,
   }) async {
     try {
       return await _dio.post(
         endpoint,
         data: FormData.fromMap(data),
+        queryParameters: queryParams,
         cancelToken: cancelToken,
       );
     } catch (e) {

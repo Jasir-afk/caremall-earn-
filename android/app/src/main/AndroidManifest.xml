@@ -42,16 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
-            <!-- App Link: Main Domain -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="caremallonline.com"
-                    android:pathPrefix="/product" />
-            </intent-filter>
 
             <!-- App Link: Sub Domain -->
             <intent-filter android:autoVerify="true">

@@ -1,14 +1,10 @@
 import 'dart:async';
 import 'package:care_mall_affiliate/app/commenwidget/app_snackbar.dart';
-
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/model/kyc_model.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/repo/kyc_profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
 class KycController extends GetxController {
   final isLoading = false.obs;
   final userData = Rxn<KycModel>();
@@ -206,7 +202,7 @@ class KycController extends GetxController {
       debugPrint("KYC Response Body: ${result['data']}");
 
       final responseData = result['data'];
-      final statusCode = result['statusCode'];
+
 
       if (result['success']) {
         try {
@@ -250,11 +246,6 @@ class KycController extends GetxController {
       } else {
         String errorMessage = result['message'] ?? 'KYC Submission Failed';
 
-        if (statusCode == 401) {
-          errorMessage = "Session expired. Please login again.";
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.remove('auth_token');
-        }
 
         // Handle 'already pending' as a pseudo-success
         if (errorMessage.toLowerCase().contains('already pending')) {

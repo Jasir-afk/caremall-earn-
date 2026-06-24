@@ -32,12 +32,9 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigateAfterDelay() async {
     // 🔧 Check for a mandatory update FIRST — halts navigation if update is needed
     if (mounted) {
-      // 🚀 Pass the latest version manually as a fallback for when Play Store detection fails
-      // Set minAppVersion to "1.0.0+13" (higher than current 1.0.0+10) to test
+      // Shows popup ONLY when Play Store has a newer version than the installed app
       final updateRequired = await UpdateService.showUpdateDialogIfNeeded(
         context,
-        force: true, // 🚨 Temporarily set to TRUE to see the popup
-        // minAppVersion is now null so it only checks Play Store versions
       );
 
       if (updateRequired) {

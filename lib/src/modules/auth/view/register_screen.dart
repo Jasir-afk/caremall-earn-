@@ -81,7 +81,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             );
           } else {
-            TcSnackbar.error('Error', result['message']);
+            Get.snackbar(
+              'Error',
+              result['message'],
+              backgroundColor: const Color.fromARGB(255, 116, 22, 22),
+              colorText: Colors.white,
+            );
+            //log(result['message']);
           }
         }
       } catch (e) {

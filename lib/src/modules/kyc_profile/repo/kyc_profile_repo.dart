@@ -1,45 +1,16 @@
-import 'dart:convert';
+import 'package:care_mall_affiliate/app/utils/dio/dio_client.dart';
 import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
-import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
+import 'package:get/get.dart' hide Response, MultipartFile;
 
 class KycProfileRepo {
-  static Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-
-    if (token == null || token.isEmpty) {
-      try {
-        if (Get.isRegistered<AuthController>()) {
-          final authController = Get.find<AuthController>();
-          if (authController.authToken.value.isNotEmpty) {
-            token = authController.authToken.value;
-          }
-        }
-      } catch (e) {
-        debugPrint("KycProfileRepo: Error finding AuthController: $e");
-      }
-    }
-    return token;
-  }
+  static DioClient get _dio => Get.find<DioClient>();
 
   static Future<Map<String, dynamic>> getKycData() async {
     try {
-      final token = await _getToken();
-
-      final response = await http.get(
-        Uri.parse(Apiurls.kycupdates),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      final responseData = jsonDecode(response.body);
-      debugPrint("KycProfileRepo: GET KYC Response: ${response.body}");
+      final response = await _dio.get(Apiurls.kycupdates);
+      final responseData = response.data;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data =
@@ -56,7 +27,7 @@ class KycProfileRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -65,18 +36,12 @@ class KycProfileRepo {
     required String email,
   }) async {
     try {
-      final token = await _getToken();
-
-      final response = await http.post(
-        Uri.parse(Apiurls.kycupdates),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'name': name, 'email': email}),
+      final response = await _dio.post(
+        Apiurls.kycupdates,
+        body: {'name': name, 'email': email},
       );
 
-      final responseData = jsonDecode(response.body);
+      final responseData = response.data;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data =
@@ -97,24 +62,14 @@ class KycProfileRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
   static Future<Map<String, dynamic>> getProfileData() async {
     try {
-      final token = await _getToken();
-
-      final response = await http.get(
-        Uri.parse(Apiurls.kycupdates),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      final responseData = jsonDecode(response.body);
-      debugPrint("KycProfileRepo: GET PROFILE Response: ${response.body}");
+      final response = await _dio.get(Apiurls.kycupdates);
+      final responseData = response.data;
 
       if (response.statusCode == 200) {
         final data =
@@ -131,7 +86,7 @@ class KycProfileRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -139,18 +94,8 @@ class KycProfileRepo {
     Map<String, dynamic> kycData,
   ) async {
     try {
-      final token = await _getToken();
-
-      final response = await http.post(
-        Uri.parse(Apiurls.kycupdates),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(kycData),
-      );
-
-      final responseData = jsonDecode(response.body);
+      final response = await _dio.post(Apiurls.kycupdates, body: kycData);
+      final responseData = response.data;
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {
@@ -168,7 +113,32 @@ class KycProfileRepo {
         };
       }
     } catch (e) {
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+      return {'success': false, 'message': e.toString()};
     }
+  }
+
+  static Future<String?> uploadImage(File file, String folder) async {
+    try {
+      final response = await _dio.postMultipart(
+        Apiurls.uploadImage,
+        data: {
+          'file': await MultipartFile.fromFile(file.path, filename: 'image.jpg'),
+        },
+        queryParams: {'folder': folder},
+      );
+
+      final data = response.data;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return data['url'] ??
+            data['path'] ??
+            data['data']?['url'] ??
+            data['data']?['file'] ??
+            data['data']?['path'] ??
+            data['filePath'];
+      }
+    } catch (e) {
+      print("KycProfileRepo: Error uploading image: $e");
+    }
+    return null;
   }
 }

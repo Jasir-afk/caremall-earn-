@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:care_mall_affiliate/app/utils/network/api_urls.dart';
 import 'package:care_mall_affiliate/app/app_buttons/app_buttons.dart';
 import 'package:care_mall_affiliate/app/commenwidget/app_snackbar.dart';
 import 'package:care_mall_affiliate/app/commenwidget/apptext.dart';
 import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/src/modules/kyc_profile/model/kyc_model.dart';
+import 'package:care_mall_affiliate/src/modules/kyc_profile/repo/kyc_profile_repo.dart';
 import 'package:flutter/services.dart';
 import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/view/home_screen.dart';
@@ -240,36 +242,14 @@ class _KycScreenState extends State<KycScreen> {
 
     if (!isAlreadySubmitted && !_formKey.currentState!.validate()) return;
 
-    if (!isAlreadySubmitted &&
-        (_aadhaarFront == null || _aadhaarBack == null)) {
-      TcSnackbar.error(
-        'Missing Documents',
-        'Please upload both Aadhaar front and back images',
-      );
+    if (!isAlreadySubmitted && _selectedDob == null) {
+      TcSnackbar.error('Required Field', 'Please select your Date of Birth');
       return;
     }
 
     final dobString = _selectedDob != null
         ? '${_selectedDob!.year}-${_selectedDob!.month.toString().padLeft(2, '0')}-${_selectedDob!.day.toString().padLeft(2, '0')}'
         : null;
-
-    String? frontBase64;
-    String? backBase64;
-
-    try {
-      if (_aadhaarFront != null) {
-        final bytes = await _aadhaarFront!.readAsBytes();
-        frontBase64 = base64Encode(bytes);
-      }
-      if (_aadhaarBack != null) {
-        final bytes = await _aadhaarBack!.readAsBytes();
-        backBase64 = base64Encode(bytes);
-      }
-    } catch (e) {
-      debugPrint('Error processing images: $e');
-      TcSnackbar.error('Error', 'Failed to process images. Please try again.');
-      return;
-    }
 
     // Map UI values to backend constants
     final Map<String, String> paymentMethodMap = {
@@ -282,6 +262,46 @@ class _KycScreenState extends State<KycScreen> {
       'Other': 'other',
     };
 
+    // Show loading while uploading files
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    String? frontPath;
+    String? backPath;
+
+    try {
+      if (_aadhaarFront != null) {
+        frontPath = await KycProfileRepo.uploadImage(_aadhaarFront!, 'kyc');
+        if (frontPath == null) {
+          Get.back(); // close loading
+          TcSnackbar.error(
+            'Upload Failed',
+            'Failed to upload Aadhaar front image',
+          );
+          return;
+        }
+      }
+      if (_aadhaarBack != null) {
+        backPath = await KycProfileRepo.uploadImage(_aadhaarBack!, 'kyc');
+        if (backPath == null) {
+          Get.back(); // close loading
+          TcSnackbar.error(
+            'Upload Failed',
+            'Failed to upload Aadhaar back image',
+          );
+          return;
+        }
+      }
+      Get.back(); // close loading
+    } catch (e) {
+      Get.back(); // close loading
+      debugPrint('Error uploading images: $e');
+      TcSnackbar.error('Error', 'Failed to upload images. Please try again.');
+      return;
+    }
+
     final kycData = KycModel(
       fullName: _fullNameCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
@@ -293,8 +313,10 @@ class _KycScreenState extends State<KycScreen> {
         state: _stateCtrl.text.trim(),
         pincode: _pincodeCtrl.text.trim(),
       ),
-      aadharFrontImage: frontBase64,
-      aadharBackImage: backBase64,
+      aadharFrontImage:
+          frontPath ?? _kycController.userData.value?.aadharFrontImage ?? "NA",
+      aadharBackImage:
+          backPath ?? _kycController.userData.value?.aadharBackImage ?? "NA",
       bankAccountNumber: _accountNumberCtrl.text.trim(),
       ifscCode: _ifscCtrl.text.trim(),
       bankName: _bankNameCtrl.text.trim(),
@@ -325,7 +347,7 @@ class _KycScreenState extends State<KycScreen> {
 
   // ────────────────────── HELPER BUILDERS ──────────────────────
 
-  Widget _sectionHeader(String title) {
+  Widget _sectionHeader(String title, {String? badgeText, Color? badgeColor}) {
     return Row(
       children: [
         Container(
@@ -343,11 +365,35 @@ class _KycScreenState extends State<KycScreen> {
           fontWeight: FontWeight.w700,
           color: AppColors.primarycolor,
         ),
+        if (badgeText != null) ...[
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: (badgeColor ?? AppColors.primarycolor).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: (badgeColor ?? AppColors.primarycolor).withOpacity(0.2),
+              ),
+            ),
+            child: AppText(
+              text: badgeText,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: badgeColor ?? AppColors.primarycolor,
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _fieldLabel(String label, {bool required = false}) {
+  Widget _fieldLabel(
+    String label, {
+    bool required = false,
+    String? badgeText,
+    Color? badgeColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -365,6 +411,27 @@ class _KycScreenState extends State<KycScreen> {
               fontWeight: FontWeight.w600,
               color: AppColors.primarycolor,
             ),
+          if (badgeText != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: (badgeColor ?? AppColors.primarycolor).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: (badgeColor ?? AppColors.primarycolor).withOpacity(
+                    0.2,
+                  ),
+                ),
+              ),
+              child: AppText(
+                text: badgeText,
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w600,
+                color: badgeColor ?? AppColors.primarycolor,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -424,11 +491,18 @@ class _KycScreenState extends State<KycScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     List<TextInputFormatter>? inputFormatters,
+    String? badgeText,
+    Color? badgeColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel(label, required: required && enabled),
+        _fieldLabel(
+          label,
+          required: required && enabled,
+          badgeText: badgeText,
+          badgeColor: badgeColor,
+        ),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -459,26 +533,29 @@ class _KycScreenState extends State<KycScreen> {
     VoidCallback onTap, {
     VoidCallback? onRemove,
     String? base64Image,
+    bool required = false,
   }) {
+    final bool hasApiImage =
+        base64Image != null &&
+        base64Image.isNotEmpty &&
+        base64Image != 'NA' &&
+        base64Image != 'null';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel(title, required: true),
+        _fieldLabel(title, required: required),
         GestureDetector(
           onTap: onTap,
           child: Container(
             height: 120.h,
             width: double.infinity,
             decoration: BoxDecoration(
-              color:
-                  file != null ||
-                      (base64Image != null && base64Image.isNotEmpty)
+              color: file != null || hasApiImage
                   ? Colors.white
                   : Colors.grey[50],
               border: Border.all(
-                color:
-                    file != null ||
-                        (base64Image != null && base64Image.isNotEmpty)
+                color: file != null || hasApiImage
                     ? AppColors.successMain.withOpacity(0.5)
                     : Colors.grey[300]!,
                 width: 1,
@@ -495,25 +572,47 @@ class _KycScreenState extends State<KycScreen> {
                         _buildRemoveOverlay(onRemove),
                       ],
                     )
-                  : (base64Image != null && base64Image.isNotEmpty)
+                  : hasApiImage
                   ? Stack(
                       fit: StackFit.expand,
                       children: [
-                        base64Image.startsWith('http')
-                            ? Image.network(
-                                base64Image,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(
-                                  child: Icon(Icons.broken_image),
-                                ),
-                              )
-                            : Image.memory(
+                        (() {
+                          final bool isNetwork =
+                              base64Image.startsWith('http') ||
+                              base64Image.startsWith('/') ||
+                              base64Image.contains('.com') ||
+                              base64Image.contains('.png') ||
+                              base64Image.contains('.jpg') ||
+                              base64Image.contains('.jpeg');
+
+                          if (isNetwork) {
+                            String imageUrl = base64Image;
+                            if (!imageUrl.startsWith('http')) {
+                              imageUrl =
+                                  '${Apiurls.baseUrl}${imageUrl.startsWith('/') ? '' : '/'}$imageUrl';
+                            }
+                            return Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Center(child: Icon(Icons.broken_image)),
+                            );
+                          } else {
+                            try {
+                              return Image.memory(
                                 base64Decode(base64Image),
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => const Center(
                                   child: Icon(Icons.broken_image),
                                 ),
-                              ),
+                              );
+                            } catch (e) {
+                              return const Center(
+                                child: Icon(Icons.broken_image),
+                              );
+                            }
+                          }
+                        })(),
                         _buildRemoveOverlay(onRemove),
                       ],
                     )
@@ -747,7 +846,11 @@ class _KycScreenState extends State<KycScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionHeader('Identity Documents'),
+        _sectionHeader(
+          'Identity Documents',
+          badgeText: 'Optional',
+          badgeColor: AppColors.bluePrimary,
+        ),
         SizedBox(height: 8.h),
         AppText(
           text: 'Ensure the document details are clearly visible.',
@@ -878,7 +981,7 @@ class _KycScreenState extends State<KycScreen> {
           _buildTextField(
             controller: _branchPathCtrl,
             label: 'Branch Path',
-            hint: 'eg. Mumbai, Bandra',
+            hint: 'eg. Branch',
           ),
         ] else ...[
           _buildTextField(
@@ -898,13 +1001,16 @@ class _KycScreenState extends State<KycScreen> {
             label: 'Linked Number',
             hint: 'eg. 91+*********',
             keyboardType: TextInputType.phone,
+            required: false,
+            badgeText: 'Optional',
+            badgeColor: AppColors.bluePrimary,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
             validator: (v) {
               if (v == null || v.trim().isEmpty) {
-                return 'Linked Number is required';
+                return null;
               }
               if (v.trim().length != 10) return 'Enter valid 10-digit number';
               return null;
@@ -1149,33 +1255,46 @@ class _KycScreenState extends State<KycScreen> {
                 // Extract values up-front so the type system knows they're non-null.
                 final frontImage = data?.aadharFrontImage ?? '';
                 final backImage = data?.aadharBackImage ?? '';
-                final hasFrontFromApi = frontImage.isNotEmpty;
-                final hasBackFromApi = backImage.isNotEmpty;
+                final hasFrontFromApi =
+                    frontImage.isNotEmpty &&
+                    frontImage != 'NA' &&
+                    frontImage != 'null';
+                final hasBackFromApi =
+                    backImage.isNotEmpty &&
+                    backImage != 'NA' &&
+                    backImage != 'null';
                 final hasFrontLocal = _aadhaarFront != null;
                 final hasBackLocal = _aadhaarBack != null;
 
-                if (hasFrontFromApi || hasFrontLocal) {
+                if (hasFrontFromApi ||
+                    hasFrontLocal ||
+                    hasBackFromApi ||
+                    hasBackLocal) {
                   return Row(
                     children: [
-                      Expanded(
-                        child: hasFrontFromApi
-                            ? _buildAadhaarThumb('Aadhaar Front', frontImage)
-                            : _buildAadhaarThumbLocal(
-                                'Aadhaar Front',
-                                _aadhaarFront!,
-                              ),
-                      ),
+                      if (hasFrontFromApi || hasFrontLocal)
+                        Expanded(
+                          child: hasFrontFromApi
+                              ? _buildAadhaarThumb('Aadhaar Front', frontImage)
+                              : _buildAadhaarThumbLocal(
+                                  'Aadhaar Front',
+                                  _aadhaarFront!,
+                                ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
                       SizedBox(width: 12.w),
-                      Expanded(
-                        child: hasBackFromApi
-                            ? _buildAadhaarThumb('Aadhaar Back', backImage)
-                            : hasBackLocal
-                            ? _buildAadhaarThumbLocal(
-                                'Aadhaar Back',
-                                _aadhaarBack!,
-                              )
-                            : const SizedBox(),
-                      ),
+                      if (hasBackFromApi || hasBackLocal)
+                        Expanded(
+                          child: hasBackFromApi
+                              ? _buildAadhaarThumb('Aadhaar Back', backImage)
+                              : _buildAadhaarThumbLocal(
+                                  'Aadhaar Back',
+                                  _aadhaarBack!,
+                                ),
+                        )
+                      else
+                        const Expanded(child: SizedBox()),
                     ],
                   );
                 }
