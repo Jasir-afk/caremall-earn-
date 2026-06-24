@@ -34,10 +34,10 @@ class DioExceptionHandler {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
 
-    if (statusCode == 401) {
-      handleUnauthorized();
-      return "🔑 Session expired. Please login again.";
-    }
+    // if (statusCode == 401) {
+    //   handleUnauthorized();
+    //   return "🔑 Session expired. Please login again.";
+    // }
 
     String message = "Something went wrong.";
 
@@ -87,10 +87,10 @@ class DioExceptionHandler {
   }
 }
 
-Future<void> handleUnauthorized() async {
-  final storage = GetStorage();
-  await storage.remove('token');
-  await storage.remove('user');
-  Get.offAll(() => const SplashScreen());
-  TcSnackbar.error('Session Expired', 'Please log in again.');
-}
+// Future<void> handleUnauthorized() async {
+//   final storage = GetStorage();
+//   await storage.remove('token');
+//   await storage.remove('user');
+//   Get.offAll(() => const SplashScreen());
+//   TcSnackbar.error('Session Expired', 'Please log in again.');
+// }

@@ -266,83 +266,38 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(6, (index) {
-                      return SizedBox(
+                    return SizedBox(
                         width: 50.w,
                         height: 60.h,
-                        child: TextFormField(
-                          controller: _otpControllers[index],
-                          focusNode: _otpFocusNodes[index],
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          ),
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                                width: 1.5,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                color: Colors.grey[300]!,
-                                width: 1.5,
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: const BorderSide(
-                                color: AppColors.primarycolor,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            LengthLimitingTextInputFormatter(
-                              6,
-                            ), // Allow up to 6 digits for paste
-                          ],
-                          onChanged: (value) {
-                            // Handle paste - if multiple digits are pasted
-                            if (value.length > 1) {
-                              // Clear current field first
-                              _otpControllers[index].text = '';
-
-                              // Distribute the pasted digits across all fields starting from current index
-                              final digits = value.split('');
-                              for (
-                                int i = 0;
-                                i < digits.length && (index + i) < 6;
-                                i++
-                              ) {
-                                _otpControllers[index + i].text = digits[i];
+                        child: KeyboardListener(
+                          focusNode: FocusNode(),
+                          onKeyEvent: (event) {
+                            if (event is KeyDownEvent &&
+                                event.logicalKey == LogicalKeyboardKey.backspace) {
+                              if (_otpControllers[index].text.isEmpty && index > 0) {
+                                _otpControllers[index - 1].clear();
+                                _otpFocusNodes[index - 1].requestFocus();
                               }
-                              // Hide keyboard after paste
-                              FocusScope.of(context).unfocus();
-
-                              setState(() {});
-                              return;
                             }
-
-                            // Handle single character input
-                            if (value.length == 1) {
-                              if (index < 5) {
-                                // Move to next field
-                                _otpFocusNodes[index + 1].requestFocus();
-                              }
-                            } else if (value.isEmpty && index > 0) {
-                              // Move to previous field on backspace
-                              _otpFocusNodes[index - 1].requestFocus();
-                            }
-                            setState(() {});
                           },
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5)
+                              )
+                            ),
+                            controller: _otpControllers[index],
+                            focusNode: _otpFocusNodes[index],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            onChanged: (value) {
+                              if (value.length == 1) {
+                                if (index < 5) {
+                                  _otpFocusNodes[index + 1].requestFocus();
+                                }
+                              }
+                            },
+                          ),
                         ),
                       );
                     }),
