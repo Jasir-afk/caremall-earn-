@@ -23,7 +23,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  @override
+
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(375, 812), // Standard mobile design size
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           color: Colors.white,
-          title: 'Care Earn+',
+          title: 'Care Mall Earn+',
           theme: ThemeData(useMaterial3: true),
           home: Center(child: const SplashScreen()),
         );
