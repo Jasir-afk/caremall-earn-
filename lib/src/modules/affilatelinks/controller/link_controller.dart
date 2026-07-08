@@ -62,8 +62,6 @@ class CreateLinkController extends GetxController {
   final activeLinks = '0'.obs;
   final totalOrders = '0'.obs;
   final totalCommissions = '0'.obs;
-
-  @override
   void onInit() {
     super.onInit();
     searchTextController = TextEditingController();
@@ -71,7 +69,6 @@ class CreateLinkController extends GetxController {
     loadData();
   }
 
-  @override
   void onClose() {
     searchTextController.dispose();
     scrollController.dispose();

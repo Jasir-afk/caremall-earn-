@@ -10,7 +10,6 @@ import 'package:get/get.dart';
 class AllLinkView extends GetView<CreateLinkController> {
   const AllLinkView({super.key});
 
-  @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<CreateLinkController>()) {
       Get.put(CreateLinkController());
