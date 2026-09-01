@@ -12,7 +12,6 @@ import 'package:get/get.dart';
 class QuickActionsWidget extends StatelessWidget {
   const QuickActionsWidget({super.key});
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       width: double.maxFinite,

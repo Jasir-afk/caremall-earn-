@@ -164,7 +164,6 @@ class _SnackbarWidget extends StatefulWidget {
     required this.onDismissed,
   });
 
-  @override
   State<_SnackbarWidget> createState() => _SnackbarWidgetState();
 }
 
@@ -177,7 +176,6 @@ class _SnackbarWidgetState extends State<_SnackbarWidget>
   static const _showDuration = Duration(milliseconds: 380);
   static const _holdDuration = Duration(milliseconds: 3200);
 
-  @override
   void initState() {
     super.initState();
 
@@ -205,7 +203,6 @@ class _SnackbarWidgetState extends State<_SnackbarWidget>
     });
   }
 
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -217,7 +214,6 @@ class _SnackbarWidgetState extends State<_SnackbarWidget>
     widget.onDismissed();
   }
 
-  @override
   Widget build(BuildContext context) {
     final safeTop = MediaQuery.of(context).padding.top;
     final type = widget.type;

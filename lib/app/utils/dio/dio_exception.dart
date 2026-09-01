@@ -37,16 +37,22 @@ class DioExceptionHandler {
     String message = "Something went wrong.";
 
     if (data is Map) {
-      message = data['message'] ?? data['msg'] ?? data['error'] ?? _messageFromStatusCode(statusCode);
-      
+      message =
+          data['message'] ??
+          data['msg'] ??
+          data['error'] ??
+          _messageFromStatusCode(statusCode);
+
       if (data.containsKey('errors') && data['errors'] is List) {
         final errorsList = data['errors'] as List;
-        final detailedErrors = errorsList.map((e) {
-          if (e is Map) {
-            return e.values.join(", ");
-          }
-          return e.toString();
-        }).join('\n');
+        final detailedErrors = errorsList
+            .map((e) {
+              if (e is Map) {
+                return e.values.join(", ");
+              }
+              return e.toString();
+            })
+            .join('\n');
         if (detailedErrors.isNotEmpty) {
           message = "$message\n$detailedErrors";
         }
@@ -81,4 +87,3 @@ class DioExceptionHandler {
     }
   }
 }
-

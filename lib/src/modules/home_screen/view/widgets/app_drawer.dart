@@ -18,7 +18,7 @@ import 'package:get/get.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
-  @override
+
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
     return Drawer(

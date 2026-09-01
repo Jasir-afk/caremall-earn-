@@ -27,7 +27,6 @@ class EarningScreen extends StatelessWidget {
     return '₹$intVal';
   }
 
-  @override
   Widget build(BuildContext context) {
     final controller = Get.put(EarningController());
 
@@ -73,15 +72,30 @@ class EarningScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // _buildPartnerBadge(controller.currentBadge.value),
-                // SizedBox(height: 24.h),
+                Text(
+                  'Earnings Dashboard',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF0F172A),
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Track your affiliate earnings and commission slabs',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: const Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 20.h),
                 _buildSummarySection(
                   controller.earningSummary.value,
                   controller.monthlyEarning.value,
                 ),
                 SizedBox(height: 24.h),
-                // _buildMonthlyEarningSection(controller.monthlyEarning.value),
-                // SizedBox(height: 32.h),
                 _buildSlabSection(
                   controller.slabs,
                   controller.earningSummary.value,
@@ -313,78 +327,105 @@ class EarningScreen extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(5),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Left coloured stripe
-          Container(width: 4.w, color: d.stripeColor),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    d.title,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 12.h),
-                  // Big value
-                  Text(
-                    d.value,
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  // Subtitle row
-                  Row(
-                    children: [
-                      if (d.subtitleIcon != null) ...[
-                        Icon(
-                          d.subtitleIcon,
-                          size: 11.sp,
-                          color: d.subtitleColor,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left coloured stripe
+            Container(width: 4.w, color: d.stripeColor),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Header: Title on Left, Icon badge on Right
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            d.title,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        SizedBox(width: 2.w),
+                        SizedBox(width: 6.w),
+                        Container(
+                          width: 32.r,
+                          height: 32.r,
+                          decoration: BoxDecoration(
+                            color: d.iconBg,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              d.icon,
+                              size: 16.sp,
+                              color: d.iconColor,
+                            ),
+                          ),
+                        ),
                       ],
-                      Expanded(
-                        child: Text(
-                          d.subtitle,
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
+                    ),
+                    SizedBox(height: 10.h),
+                    // Big value
+                    Text(
+                      d.value,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 4.h),
+                    // Subtitle row
+                    Row(
+                      children: [
+                        if (d.subtitleIcon != null) ...[
+                          Icon(
+                            d.subtitleIcon,
+                            size: 12.sp,
                             color: d.subtitleColor,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          SizedBox(width: 3.w),
+                        ],
+                        Expanded(
+                          child: Text(
+                            d.subtitle,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
+                              color: d.subtitleColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -487,29 +528,28 @@ class EarningScreen extends StatelessWidget {
     // ── Dynamic colour for this tier ──────────────────────────────────────────
     final colors = _slabColor(tierNumber, currentSlab.title);
     final accentColor = colors.accent;
-    final lightBg = colors.light;
-    final accentLight = colors.accentLight;
+    final lightBg = const Color(0xFFF0F7FF);
 
     // Use numeric fields for progress calculation
     double progress = 0.0;
     final salesNum = _parseAmount(summary.thisMonthSales);
     final targetAmountNum = currentSlab.maxSales;
-    final bool isStarterNoSales = tierNumber == 1 && salesNum <= 0;
+    final bool isStarterNoSales = markedCurrentIndex == -1 && salesNum <= 0;
     final displayedCommission = isStarterNoSales
         ? '0%'
         : currentSlab.commission;
     final displayedRange = isStarterNoSales ? '₹0 - ₹0' : currentSlab.range;
-    final progressTargetNum = targetAmountNum > 0
+    final progressTargetNum = targetAmountNum > 0 && targetAmountNum < 999999999
         ? targetAmountNum
-        : (tierNumber == 1
-              ? 1.0
-              : (nextSlab?.minSales ??
-                    0.0)); // Starter needs ₹1 to unlock Tier 2
-    final String progressSubText =
-        '${_formatCurrencyCompact(salesNum)} / ${_formatCurrencyCompact(progressTargetNum)}';
+        : (currentSlab.minSales > 0
+            ? currentSlab.minSales
+            : (nextSlab?.minSales ?? 2.0));
+    final String progressSubText = isStarterNoSales
+        ? '₹0 / ₹N/A'
+        : '${_formatCurrencyCompact(salesNum)} / ${_formatCurrencyCompact(progressTargetNum)}';
     String targetAmount = progressTargetNum.toInt().toString();
 
-    // Calculate progress using the same target shown to the user.
+    // Calculate progress using the target.
     if (progressTargetNum > 0) {
       progress = (salesNum / progressTargetNum).clamp(0.0, 1.0);
     } else {
@@ -529,19 +569,19 @@ class EarningScreen extends StatelessWidget {
             border: Border.all(color: const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
-                color: accentColor.withAlpha(20),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
-              // ── Top accent stripe — changes colour with tier ───────────────
+              // ── Top accent stripe ──────────────────────────────────────────
               AnimatedContainer(
                 duration: const Duration(milliseconds: 400),
-                height: 6.h,
+                height: 4.h,
                 color: accentColor,
               ),
               Padding(
@@ -559,9 +599,9 @@ class EarningScreen extends StatelessWidget {
                               Text(
                                 'Current Commission Slab',
                                 style: TextStyle(
-                                  fontSize: 18.sp,
+                                  fontSize: 17.sp,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.black,
+                                  color: const Color(0xFF0F172A),
                                 ),
                               ),
                               SizedBox(height: 4.h),
@@ -569,49 +609,36 @@ class EarningScreen extends StatelessWidget {
                                 "You're in ${currentSlab.title} ($tierCategory)",
                                 style: TextStyle(
                                   fontSize: 13.sp,
-                                  color: AppColors.textDefaultSecondarycolor,
+                                  color: const Color(0xFF64748B),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // ── Tier badge circle — gradient changes with tier ───
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 400),
-                          width: 80.r,
-                          height: 80.r,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [accentLight, accentColor],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: accentColor.withAlpha(40),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
+                        // ── Pill badge matching UI ───
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 8.h,
                           ),
-                          child: Center(
-                            child: Text(
-                              '${currentSlab.title} - $displayedCommission',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                height: 1.2,
-                              ),
+                          decoration: BoxDecoration(
+                            color: accentColor,
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Text(
+                            '${currentSlab.title} - $displayedCommission',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 20.h),
                     Row(
                       children: [
                         Expanded(
@@ -622,7 +649,7 @@ class EarningScreen extends StatelessWidget {
                             accentColor,
                           ),
                         ),
-                        SizedBox(width: 16.w),
+                        SizedBox(width: 14.w),
                         Expanded(
                           child: _buildFeaturedInfoCard(
                             'Slab Range',
@@ -633,17 +660,17 @@ class EarningScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.h),
+                    SizedBox(height: 20.h),
                     _buildProgressBar(
                       'Progress in ${currentSlab.title}',
                       progress,
                       progressSubText,
                       accentColor,
                     ),
-                    if (nextSlab != null) ...[
-                      SizedBox(height: 24.h),
+                    if (nextSlab != null || isStarterNoSales) ...[
+                      SizedBox(height: 20.h),
                       _buildNextTierPromotion(
-                        nextSlab,
+                        nextSlab ?? currentSlab,
                         targetAmount,
                         summary.thisMonthSales,
                       ),
@@ -665,10 +692,10 @@ class EarningScreen extends StatelessWidget {
     Color textColor,
   ) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -677,15 +704,15 @@ class EarningScreen extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF64748B),
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w800,
               color: textColor,
             ),
@@ -702,6 +729,7 @@ class EarningScreen extends StatelessWidget {
     Color color,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -711,39 +739,36 @@ class EarningScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF64748B),
+                color: const Color(0xFF475569),
               ),
             ),
             Text(
               '${(progress * 100).toInt()}%',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
-                color: Colors.black,
+                color: const Color(0xFF0F172A),
               ),
             ),
           ],
         ),
         SizedBox(height: 10.h),
         ClipRRect(
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(6.r),
           child: LinearProgressIndicator(
             value: progress,
             backgroundColor: const Color(0xFFE2E8F0),
             color: color,
-            minHeight: 10.h,
+            minHeight: 8.h,
           ),
         ),
         SizedBox(height: 8.h),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            subText,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF94A3B8),
-            ),
+        Text(
+          subText,
+          style: TextStyle(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF94A3B8),
           ),
         ),
       ],
@@ -755,17 +780,16 @@ class EarningScreen extends StatelessWidget {
     String targetAmount,
     String currentSalesStr,
   ) {
-    final target = nextSlab.minSales;
+    const purpleHighlight = Color(0xFF9333EA);
+    final target = nextSlab.minSales > 0 ? nextSlab.minSales : 2.0;
     final currentSales =
         double.tryParse(currentSalesStr.replaceAll(RegExp(r'[^0-9.]'), '')) ??
         0;
     final remaining = (target - currentSales).clamp(0.0, double.infinity);
     final nextTierNumberMatch = RegExp(r'(\d+)').firstMatch(nextSlab.title);
     final nextTierNumber =
-        int.tryParse(nextTierNumberMatch?.group(1) ?? '') ?? 0;
-    final nextTierCategory = nextTierNumber > 0
-        ? _tierCategory(nextTierNumber)
-        : '';
+        int.tryParse(nextTierNumberMatch?.group(1) ?? '') ?? 2;
+    final nextTierCategory = _tierCategory(nextTierNumber);
     final progressValue = target > 0
         ? (currentSales / target).clamp(0.0, 1.0)
         : 0.0;
@@ -773,101 +797,75 @@ class EarningScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F3FF),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: const Color(0xFFDDD6FE)),
+        color: const Color(0xFFFAF5FF),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: const Color(0xFFEDE9FE)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.all(8.r),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFA78BFA).withAlpha(4),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.workspace_premium_rounded,
-                  color: const Color(0xFFA78BFA),
-                  size: 18.sp,
-                ),
+              Icon(
+                Icons.workspace_premium_outlined,
+                color: purpleHighlight,
+                size: 20.sp,
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Unlock Next Tier',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                        children: [
-                          const TextSpan(text: 'Reach '),
-                          TextSpan(
-                            text: '₹${target.toInt()}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF111827),
-                            ),
-                          ),
-                          const TextSpan(text: ' in sales to unlock '),
-                          TextSpan(
-                            text: nextSlab.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF2563EB),
-                            ),
-                          ),
-                          if (nextTierCategory.isNotEmpty)
-                            TextSpan(
-                              text: ' ($nextTierCategory)',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF7C3AED),
-                              ),
-                            ),
-                          const TextSpan(text: ' and earn '),
-                          TextSpan(
-                            text: nextSlab.commission,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF7C3AED),
-                            ),
-                          ),
-                          const TextSpan(text: ' commission!'),
-                        ],
-                      ),
-                    ),
-                  ],
+              SizedBox(width: 8.w),
+              Text(
+                'Unlock Next Tier',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1E1B4B),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 6.h),
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: const Color(0xFF64748B),
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+              ),
+              children: [
+                const TextSpan(text: 'Reach '),
+                TextSpan(
+                  text: '₹${target.toInt()}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: purpleHighlight,
+                  ),
+                ),
+                const TextSpan(text: ' in sales to unlock '),
+                TextSpan(
+                  text: 'Tier $nextTierNumber ($nextTierCategory)',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: purpleHighlight,
+                  ),
+                ),
+                const TextSpan(text: ' and earn '),
+                TextSpan(
+                  text: nextSlab.commission,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: purpleHighlight,
+                  ),
+                ),
+                const TextSpan(text: ' commission!'),
+              ],
+            ),
+          ),
+          SizedBox(height: 14.h),
           Row(
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(6.r),
                   child: LinearProgressIndicator(
                     value: progressValue,
                     backgroundColor: Colors.white,
@@ -891,6 +889,8 @@ class EarningScreen extends StatelessWidget {
       ),
     );
   }
+
+
 
   Widget _buildMonthlyBreakdownSection(
     MonthlyEarningModel monthlyEarning,
@@ -1150,6 +1150,10 @@ class EarningScreen extends StatelessWidget {
   Widget _buildAllSlabsSection(List<SlabModel> slabs) {
     if (slabs.isEmpty) return const SizedBox.shrink();
 
+    final markedCurrentIndex = slabs.indexWhere((s) => s.isCurrent);
+    final effectiveCurrentIndex =
+        markedCurrentIndex != -1 ? markedCurrentIndex : 0;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -1193,11 +1197,17 @@ class EarningScreen extends StatelessWidget {
             height: 480.h,
             child: ListView.separated(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.zero,
+              clipBehavior: Clip.none,
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
               itemCount: slabs.length,
-              separatorBuilder: (context, index) => SizedBox(height: 12.h),
+              separatorBuilder: (context, index) => SizedBox(height: 14.h),
               itemBuilder: (context, index) {
-                return _buildSlabTileItem(slabs[index], index + 1);
+                final bool isActive = index == effectiveCurrentIndex;
+                return _buildSlabTileItem(
+                  slabs[index],
+                  index + 1,
+                  isActive: isActive,
+                );
               },
             ),
           ),
@@ -1206,9 +1216,11 @@ class EarningScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSlabTileItem(SlabModel slab, int tierNumber) {
-    final bool isActive = slab.isCurrent;
-
+  Widget _buildSlabTileItem(
+    SlabModel slab,
+    int tierNumber, {
+    required bool isActive,
+  }) {
     // Color palette based on tier category OR fallback to index ranges
     Color badgeBg;
     Color badgeText;
@@ -1259,121 +1271,129 @@ class EarningScreen extends StatelessWidget {
       badgeText = const Color(0xFF3B82F6);
     }
 
-    // Use the same colour helper so active tile colour matches current slab card
     final tileColors = _slabColor(tierNumber, slab.title);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        gradient: isActive
-            ? LinearGradient(
-                colors: [tileColors.accentLight, tileColors.accent],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              )
-            : null,
-        color: isActive ? null : Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: isActive ? tileColors.accent : const Color(0xFFE2E8F0),
-          width: isActive ? 0 : 1,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: isActive ? tileColors.accent : Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: isActive ? tileColors.accent : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: tileColors.accent.withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Row(
+            children: [
+              // Tier badge square
+              Container(
+                width: 66.w,
+                height: 66.w,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? const Color(0xFF60A5FA).withValues(alpha: 0.5)
+                      : badgeBg,
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Tier $tierNumber',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isActive ? Colors.white : badgeText,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      slab.commission,
+                      style: TextStyle(
+                        fontSize: 19.sp,
+                        fontWeight: FontWeight.w900,
+                        color: isActive ? Colors.white : badgeText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 16.w),
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayTitle,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isActive ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'Sales: ${slab.range}',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: isActive
+                            ? Colors.white.withValues(alpha: 0.9)
+                            : const Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        boxShadow: isActive
-            ? [
-                BoxShadow(
-                  color: tileColors.accent.withValues(alpha: 0.25),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Row(
-        children: [
-          // Tier badge
-          Container(
-            width: 62.w,
-            height: 62.w,
-            decoration: BoxDecoration(
-              color: isActive ? Colors.white.withValues(alpha: 0.2) : badgeBg,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Tier $tierNumber',
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: isActive
-                        ? Colors.white.withValues(alpha: 0.85)
-                        : badgeText,
-                  ),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  slab.commission,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w900,
-                    color: isActive ? Colors.white : badgeText,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 16.w),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayTitle,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: isActive ? Colors.white : Colors.black,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  'Sales: ${slab.range}',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: isActive
-                        ? Colors.white.withValues(alpha: 0.8)
-                        : const Color(0xFF64748B),
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Active badge / checkmark
-          if (isActive)
-            Container(
-              padding: EdgeInsets.all(6.r),
+        // Floating green ribbon badge on top right for active slab
+        if (isActive)
+          Positioned(
+            top: -6.h,
+            right: -6.w,
+            child: Container(
+              padding: EdgeInsets.all(5.r),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
-                Icons.check_circle_rounded,
-                color: Colors.white,
-                size: 18.sp,
+                Icons.bookmark_outline_rounded,
+                color: const Color(0xFF16A34A),
+                size: 16.sp,
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

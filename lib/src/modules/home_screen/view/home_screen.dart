@@ -17,7 +17,6 @@ import 'package:get/get.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -27,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   static final RouteObserver<ModalRoute<void>> _routeObserver =
       RouteObserver<ModalRoute<void>>();
 
-  @override
   void initState() {
     super.initState();
     _dashboardController = Get.isRegistered<DashboardController>()
@@ -35,21 +33,17 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         : Get.put(DashboardController(), permanent: true);
   }
 
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
-  @override
   void dispose() {
     _routeObserver.unsubscribe(this);
     _scrollController.dispose();
     super.dispose();
   }
 
-  /// Called every time we navigate back to this screen.
-  @override
   void didPopNext() {
     _dashboardController.refreshData();
   }
@@ -58,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     await _dashboardController.loadDashboardData(showLoading: true);
   }
 
-  @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
     final dashboardController = _dashboardController;

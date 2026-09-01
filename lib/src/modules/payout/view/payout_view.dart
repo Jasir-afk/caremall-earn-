@@ -11,7 +11,6 @@ import 'package:get/get.dart';
 class PayoutView extends StatelessWidget {
   const PayoutView({super.key});
 
-  @override
   Widget build(BuildContext context) {
     final controller = Get.isRegistered<PayoutController>()
         ? Get.find<PayoutController>()
@@ -281,7 +280,6 @@ class _StatCard extends StatelessWidget {
     this.isCompact = false,
   });
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(isCompact ? 16.w : 24.w),
@@ -378,7 +376,6 @@ class _PayoutCard extends StatelessWidget {
 
   const _PayoutCard({required this.item});
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
@@ -568,7 +565,6 @@ class _InfoChip extends StatelessWidget {
     required this.color,
   });
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
@@ -608,7 +604,6 @@ class _MethodBadge extends StatelessWidget {
 
   const _MethodBadge({required this.method});
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -656,7 +651,6 @@ class _StatusBadge extends StatelessWidget {
 
   const _StatusBadge({required this.status});
 
-  @override
   Widget build(BuildContext context) {
     final Color borderColor;
     final Color textColor;
@@ -752,7 +746,6 @@ class _PaginationBar extends StatelessWidget {
     required this.onNext,
   });
 
-  @override
   Widget build(BuildContext context) {
     final isFirst = currentPage <= 1;
     final isLast = currentPage >= totalPages;
@@ -815,7 +808,6 @@ class _PagButton extends StatelessWidget {
     required this.onTap,
   });
 
-  @override
   Widget build(BuildContext context) {
     final color = enabled ? Colors.black87 : Colors.grey[350]!;
 

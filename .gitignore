@@ -11,7 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
-
+.agents/
+.augment/
+skills-lock.json
 # IntelliJ related
 *.iml
 *.ipr

@@ -8,7 +8,6 @@ import 'package:get_storage/get_storage.dart';
 class DioInterceptor extends Interceptor {
   final GetStorage _storage = GetStorage();
 
-  @override
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
@@ -25,13 +24,11 @@ class DioInterceptor extends Interceptor {
     return handler.next(options);
   }
 
-  @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     log('✅ Response: ${response.statusCode} ${response.data}');
     handler.next(response);
   }
 
-  @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     log('❌ Error: ${err.response?.statusCode} - ${err.message}');
     if (err.response != null) {

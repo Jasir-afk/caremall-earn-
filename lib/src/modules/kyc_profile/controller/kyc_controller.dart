@@ -5,6 +5,7 @@ import 'package:care_mall_affiliate/src/modules/kyc_profile/model/kyc_model.dart
 import 'package:care_mall_affiliate/src/modules/kyc_profile/repo/kyc_profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class KycController extends GetxController {
   final isLoading = false.obs;
   final userData = Rxn<KycModel>();
@@ -13,7 +14,6 @@ class KycController extends GetxController {
   final Completer<void> _profileReadyCompleter = Completer<void>();
   Future<void> get profileLoaded => _profileReadyCompleter.future;
 
-  @override
   void onInit() {
     super.onInit();
     getKycData();
@@ -203,7 +203,6 @@ class KycController extends GetxController {
 
       final responseData = result['data'];
 
-
       if (result['success']) {
         try {
           if (Get.isRegistered<AuthController>()) {
@@ -245,7 +244,6 @@ class KycController extends GetxController {
         }
       } else {
         String errorMessage = result['message'] ?? 'KYC Submission Failed';
-
 
         // Handle 'already pending' as a pseudo-success
         if (errorMessage.toLowerCase().contains('already pending')) {
