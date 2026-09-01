@@ -10,7 +10,6 @@ class OverallPerformanceWidget extends StatefulWidget {
   final List<FlSpot>? spots;
   const OverallPerformanceWidget({super.key, this.spots});
 
-  @override
   State<OverallPerformanceWidget> createState() =>
       _OverallPerformanceWidgetState();
 }
@@ -22,7 +21,6 @@ class _OverallPerformanceWidgetState extends State<OverallPerformanceWidget>
     const Color(0xFF22C55E).withAlpha(3), // ~1% opacity (faded)
   ];
 
-  @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.w),

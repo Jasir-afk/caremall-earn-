@@ -28,7 +28,6 @@ class AuthController extends GetxController {
   final Completer<void> _authReadyCompleter = Completer<void>();
   Future<void> get authDataLoaded => _authReadyCompleter.future;
 
-  @override
   void onInit() {
     super.onInit();
     _loadAuthData();
@@ -49,7 +48,6 @@ class AuthController extends GetxController {
           storage.write('token', savedToken);
         }
       }
-
 
       // Load User Data (including KYC Status)
       final savedUserData = prefs.getString('user_data');

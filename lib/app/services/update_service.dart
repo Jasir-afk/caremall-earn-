@@ -148,7 +148,6 @@ class _MandatoryUpdateDialog extends StatelessWidget {
 
   const _MandatoryUpdateDialog({required this.packageName});
 
-  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,

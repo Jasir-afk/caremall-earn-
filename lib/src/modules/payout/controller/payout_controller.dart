@@ -29,7 +29,7 @@ class PayoutController extends GetxController {
   static const int _pageSize = 9;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
-  @override
+
   void onInit() {
     super.onInit();
     _loadAll();

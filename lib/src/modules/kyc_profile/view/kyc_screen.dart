@@ -22,7 +22,6 @@ import 'package:care_mall_affiliate/src/modules/kyc_profile/view/widgets/deleteb
 class KycScreen extends StatefulWidget {
   const KycScreen({super.key});
 
-  @override
   State<KycScreen> createState() => _KycScreenState();
 }
 
@@ -58,7 +57,6 @@ class _KycScreenState extends State<KycScreen> {
   String _paymentMethod = 'Bank Transfer';
   Worker? _worker;
 
-  @override
   void initState() {
     super.initState();
     _kycController.getKycData();
@@ -165,7 +163,6 @@ class _KycScreenState extends State<KycScreen> {
     }
   }
 
-  @override
   void dispose() {
     _fullNameCtrl.dispose();
     _emailCtrl.dispose();
@@ -1023,7 +1020,6 @@ class _KycScreenState extends State<KycScreen> {
 
   // ────────────────────── BUILD ──────────────────────
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundDefault,

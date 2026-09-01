@@ -62,8 +62,6 @@ class CreateLinkController extends GetxController {
   final activeLinks = '0'.obs;
   final totalOrders = '0'.obs;
   final totalCommissions = '0'.obs;
-
-  @override
   void onInit() {
     super.onInit();
     searchTextController = TextEditingController();
@@ -71,7 +69,6 @@ class CreateLinkController extends GetxController {
     loadData();
   }
 
-  @override
   void onClose() {
     searchTextController.dispose();
     scrollController.dispose();
@@ -590,6 +587,7 @@ class CreateLinkController extends GetxController {
   }
 
   Future<void> launchCareMallLink(String linkUrl) async {
+    try { await Clipboard.setData(ClipboardData(text: linkUrl)); } catch (_) {}
     debugPrint('CreateLinkController: Attempting to open link: $linkUrl');
     final Uri webUri = Uri.parse(linkUrl);
 
@@ -597,6 +595,8 @@ class CreateLinkController extends GetxController {
     String? slug;
     final String host = webUri.host;
     if (host.contains('caremallonline.com') ||
+        host.contains('caremall.in') ||
+        host.contains('caremall') ||
         host.contains('caremall-userside-frontend')) {
       final index = webUri.pathSegments.indexOf('product');
       if (index != -1 && webUri.pathSegments.length > index + 1) {
@@ -606,7 +606,19 @@ class CreateLinkController extends GetxController {
 
     // ── Strategy 1: Try caremall:// custom scheme ──────────────────────────
     if (slug != null && slug.isNotEmpty) {
-      final appUri = Uri.parse('caremall://product/$slug');
+      String? affiliateCode;
+      final rIndex = webUri.pathSegments.indexOf('r');
+      if (rIndex != -1 && webUri.pathSegments.length > rIndex + 1) {
+        affiliateCode = webUri.pathSegments[rIndex + 1];
+      }
+      affiliateCode ??= webUri.queryParameters['affiliate'] ??
+          webUri.queryParameters['ref'] ??
+          webUri.queryParameters['code'] ??
+          webUri.queryParameters['affiliateCode'];
+
+      final appUri = (affiliateCode != null && affiliateCode.isNotEmpty)
+          ? Uri.parse('caremall://product/$slug/r/$affiliateCode')
+          : Uri.parse('caremall://product/$slug');
       debugPrint('CreateLinkController: [1] Trying caremall:// → $appUri');
       try {
         final bool launched = await launchUrl(

@@ -3,7 +3,6 @@ import 'package:care_mall_affiliate/src/modules/earning/repo/earning_repo.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/repo/homescreen_repo.dart';
 import 'package:care_mall_affiliate/src/modules/payout/controller/payout_repo.dart';
 import 'package:care_mall_affiliate/src/modules/payout/model/payout_model.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -53,7 +52,7 @@ class EarningController extends GetxController {
     PartnerBadgeModel(name: 'Starter Tier', icon: 'stars', color: '0xFF3B82F6'),
   );
   final selectedTimeRange = 'Last 30 Days'.obs;
-  @override
+
   void onInit() {
     super.onInit();
     fetchAllData();
@@ -197,49 +196,23 @@ class EarningController extends GetxController {
         List<SlabModel>? apiSlabs;
 
         if (data is Map<String, dynamic>) {
-          // New response structure: allSlabs, currentSlabIndex
+          // Response structure: allSlabs, currentSlab, currentSlabIndex, nextSlab, totalSales
           if (data['allSlabs'] is List) {
             final List<dynamic> slabList = data['allSlabs'];
-            int? currentIndex = data['currentSlabIndex'];
-            final bool noCurrentSlab =
-                (currentIndex != null && currentIndex < 0) ||
-                data['currentSlab'] == null;
+            final int currentIndex = (data['currentSlabIndex'] as int?) ?? -1;
 
             if (slabList.isNotEmpty) {
-              apiSlabs = [];
-              if (noCurrentSlab) {
-                // When backend returns currentSlabIndex=-1 & currentSlab=null,
-                // show a base Starter tier (Tier 1) with 0% until user reaches ₹30,000.
-                apiSlabs.add(
-                  SlabModel(
-                    title: 'Tier 1',
-                    minSales: 0,
-                    maxSales: 30000,
-                    commissionPercentage: 0,
-                    isCurrent: true,
-                  ),
-                );
-                // Shift actual slabs by +1 so first real slab becomes Tier 2.
-                for (int i = 0; i < slabList.length; i++) {
-                  apiSlabs.add(
-                    SlabModel.fromJson(
-                      slabList[i] as Map<String, dynamic>,
-                      index: i + 1,
-                      currentIndex: null,
-                    ),
-                  );
-                }
-              } else {
-                for (int i = 0; i < slabList.length; i++) {
-                  apiSlabs.add(
-                    SlabModel.fromJson(
-                      slabList[i] as Map<String, dynamic>,
-                      index: i,
+              apiSlabs = slabList
+                  .asMap()
+                  .entries
+                  .map(
+                    (entry) => SlabModel.fromJson(
+                      entry.value as Map<String, dynamic>,
+                      index: entry.key,
                       currentIndex: currentIndex,
                     ),
-                  );
-                }
-              }
+                  )
+                  .toList();
             }
           }
 

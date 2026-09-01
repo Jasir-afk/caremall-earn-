@@ -10,7 +10,6 @@ import 'package:google_fonts/google_fonts.dart';
 class DeleteAccountButton extends StatelessWidget {
   const DeleteAccountButton({super.key});
 
-  @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 800),
@@ -311,7 +310,9 @@ class DeleteAccountButton extends StatelessWidget {
                                         Get.back();
                                         authController.deleteAccount(
                                           onSuccess: () {
-                                            Get.offAll(() => const LoginScreen());
+                                            Get.offAll(
+                                              () => const LoginScreen(),
+                                            );
                                           },
                                         );
                                       }

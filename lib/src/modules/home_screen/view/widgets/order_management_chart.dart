@@ -15,13 +15,11 @@ class OrderManagementChart extends StatefulWidget {
     required this.onTimeRangeChanged,
   });
 
-  @override
   State<OrderManagementChart> createState() => _OrderManagementChartState();
 }
 
 class _OrderManagementChartState extends State<OrderManagementChart>
     with SingleTickerProviderStateMixin {
-  @override
   Widget build(BuildContext context) {
     final displayData = widget.data;
 

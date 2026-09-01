@@ -9,6 +9,11 @@ class DashboardDataModel {
   final Color subtitleColor;
   final Color iconColor;
 
+  /// Top right badge icon and colors
+  final IconData? cardIcon;
+  final Color? cardIconColor;
+  final Color? cardIconBgColor;
+
   /// Icon shown before subtitle (e.g. arrow for "to Target").
   final IconData? subtitleIcon;
   final Color? subtitleIconColor;
@@ -29,10 +34,13 @@ class DashboardDataModel {
     required this.title,
     required this.value,
     this.subtitle = '',
-    this.titleColor = Colors.black,
+    this.titleColor = const Color(0xFF475569),
     this.valueColor = Colors.black,
     this.subtitleColor = Colors.grey,
     required this.iconColor,
+    this.cardIcon,
+    this.cardIconColor,
+    this.cardIconBgColor,
     this.subtitleIcon,
     this.subtitleIconColor,
     this.subtitleValue,

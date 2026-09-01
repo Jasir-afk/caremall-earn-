@@ -14,7 +14,6 @@ class OrderScreen extends GetView<OrderController> {
     return '${status![0].toUpperCase()}${status!.substring(1)} Orders';
   }
 
-  @override
   Widget build(BuildContext context) {
     // Ensure controller is initialized
     if (!Get.isRegistered<OrderController>()) {
@@ -548,8 +547,6 @@ class _PaginationBar extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
   });
-
-  @override
   Widget build(BuildContext context) {
     final isFirst = currentPage <= 1;
     final isLast = currentPage >= totalPages;
@@ -612,7 +609,6 @@ class _PagButton extends StatelessWidget {
     required this.onTap,
   });
 
-  @override
   Widget build(BuildContext context) {
     final color = enabled ? Colors.black87 : Colors.grey[350]!;
     return GestureDetector(

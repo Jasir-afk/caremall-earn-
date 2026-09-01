@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 
 class GenerateLinksScreen extends GetView<CreateLinkController> {
   const GenerateLinksScreen({super.key});
-  @override
+
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {

@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:care_mall_affiliate/app/utils/dio/dio.dart';
 import 'package:care_mall_affiliate/app/services/update_service.dart';
 import 'package:get_storage/get_storage.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
@@ -20,10 +19,8 @@ void main() async {
   UpdateService.configure(debugLogging: false);
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(375, 812), // Standard mobile design size

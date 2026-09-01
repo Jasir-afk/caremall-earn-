@@ -12,13 +12,13 @@ import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
-  @override
+
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   double _opacity = 0.0;
-  @override
+
   void initState() {
     super.initState();
     // Trigger fade-in animation
@@ -78,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen> {
     DeepLinkService.processPendingLink();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whitecolor,

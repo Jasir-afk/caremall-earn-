@@ -15,7 +15,6 @@ class DashedRect extends StatelessWidget {
     required this.child,
   });
 
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(strokeWidth / 2),
@@ -42,7 +41,6 @@ class DashRectPainter extends CustomPainter {
     this.gap = 5.0,
   });
 
-  @override
   void paint(Canvas canvas, Size size) {
     Paint dashedPaint = Paint()
       ..color = color
@@ -101,7 +99,6 @@ class DashRectPainter extends CustomPainter {
     return path;
   }
 
-  @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }

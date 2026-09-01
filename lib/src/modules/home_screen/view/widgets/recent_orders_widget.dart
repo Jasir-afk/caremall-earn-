@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 class RecentOrdersWidget extends StatelessWidget {
   final List<RecentOrderModel> orders;
   const RecentOrdersWidget({super.key, required this.orders});
-  @override
+
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

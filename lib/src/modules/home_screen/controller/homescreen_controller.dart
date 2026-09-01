@@ -24,8 +24,15 @@ class DashboardController extends GetxController {
   // Total order amount (₹) from dashboard stats (used in Overall Performance header).
   final totalOrderAmount = 0.0.obs;
   final monthlyEarningValue = '0'.obs; // NEW
-  final slabTarget = 0.0.obs; // Derived from commission slab (max sales)
-  final slabMinSales = 0.0.obs; // NEW: Derived from commission slab (min sales)
+  final slabTarget =
+      0.0.obs; // Derived from commission slab (target to reach next slab)
+  final slabMinSales = 0.0.obs; // Derived from commission slab (min sales)
+  final currentSlabIndex = (-1).obs;
+  final currentCommissionRate = 0.0.obs;
+  final nextCommissionRate = 0.0.obs;
+  final currentTierName = ''.obs;
+  final nextTierName = ''.obs;
+  final slabTotalSales = 0.0.obs;
   final orderStats = <String, int>{
     'pending': 0,
     'completed': 0,
@@ -47,7 +54,6 @@ class DashboardController extends GetxController {
     }
   }
 
-  @override
   void onInit() {
     super.onInit();
     loadDashboardData();
@@ -123,33 +129,24 @@ class DashboardController extends GetxController {
       final double targetSales = slabTarget.value > 0
           ? slabTarget.value
           : (data['targetSales'] ?? 0).toDouble();
-      final double thisMonthSales = (data['thisMonthSales'] ?? 0).toDouble();
+      final double thisMonthSales =
+          (data['thisMonthSales'] ??
+                  (slabTotalSales.value > 0 ? slabTotalSales.value : 0))
+              .toDouble();
       final int clicksThisMonth = (data['clicksThisMonth'] ?? 0).toInt();
 
-      // Total Order card shows only delivered orders
+      // Total Order card shows delivered orders
       final int totalOrderCount = orderStats['completed'] ?? 0;
-      final int clicksLastMonth = (data['clicksLastMonth'] ?? 0).toInt();
-      final int thisMonthConversions = (data['thisMonthConversions'] ?? 0)
-          .toInt();
-      final int lastMonthConversions = (data['lastMonthConversions'] ?? 0)
-          .toInt();
       final double totalRevenue =
           (data['totalSales'] ??
                   data['totalCommission'] ??
                   data['total_revenue'] ??
                   data['totalEarnings'] ??
                   data['referredAmount'] ??
-                  0)
-              .toDouble();
-      final double lastMonthRevenue =
-          (data['lastMonthRevenue'] ??
-                  data['lastMonthCommission'] ??
-                  data['last_month_revenue'] ??
-                  0)
+                  (slabTotalSales.value > 0 ? slabTotalSales.value : 0))
               .toDouble();
 
       // Update total order amount (₹) for use in Overall Performance header.
-      // Prefer thisMonthSales (matches \"Sales This Month\" card); fall back to totalRevenue.
       totalOrderAmount.value = thisMonthSales > 0
           ? thisMonthSales
           : totalRevenue;
@@ -163,29 +160,16 @@ class DashboardController extends GetxController {
                   ?.toString();
           if (status != null && status.isNotEmpty) {
             await authCtrl.saveUserData(kyc: status);
-            debugPrint("DashboardController: Synced KYC Status -> $status");
           }
         }
       } catch (e) {
         debugPrint("Error syncing KYC status from dashboard: $e");
       }
 
-      // Helper to compute percentage change string
-      String pctChange(double current, double previous) {
-        if (previous == 0) return current > 0 ? '+100%' : '0';
-        final pct = ((current - previous) / previous * 100).round();
-        if (pct == 0) return '0';
-        return pct >= 0 ? '+$pct%' : '$pct%';
-      }
-
-      // Helper to determine if trend is positive
-      bool isPositive(double current, double previous) => current >= previous;
-
-      // Month target from current commission slab (same as Earning panel).
-      // Default current slab is Tier 1 → target is slab maxSales (e.g. ₹30,000).
+      // Month target from commission slab
       final String monthTargetDisplay = targetSales > 0
           ? '₹${NumberFormat('#,##,###').format(targetSales.toInt())}'
-          : '₹30,000';
+          : '₹0';
 
       // Sales This Month: subtitle = amount to target (match design)
       final double remainingToTarget = targetSales > 0
@@ -193,31 +177,53 @@ class DashboardController extends GetxController {
           : 0.0;
       final bool targetAchieved =
           targetSales > 0 && thisMonthSales >= targetSales;
-      final String salesToTargetSubtitle = targetAchieved || targetSales <= 0
+      final String salesToTargetSubtitle = targetAchieved
           ? 'Target achieved'
-          : '₹${NumberFormat('#,##,###').format(remainingToTarget.toInt())} to Target';
+          : (targetSales > 0
+                ? '₹${NumberFormat('#,##,###').format(remainingToTarget.toInt())} to Target'
+                : '');
       final Color salesToTargetSubtitleColor = targetAchieved
           ? const Color(0xFF22C55E)
           : const Color(0xFFEF4444);
       final IconData salesToTargetSubtitleIcon = targetAchieved
-          ? Icons.trending_up
-          : Icons.trending_down;
-      final String? salesToTargetValue = targetAchieved
+          ? Icons.check_circle_outline_rounded
+          : Icons.track_changes_rounded;
+      final String? salesToTargetValue = targetAchieved || targetSales <= 0
           ? null
           : '₹${NumberFormat('#,##,###').format(remainingToTarget.toInt())}';
-      final String? salesToTargetLabel = targetAchieved ? null : ' to Target';
+      final String? salesToTargetLabel = targetAchieved || targetSales <= 0
+          ? null
+          : ' to Target';
       final Color salesToTargetLabelColor = const Color(0xFF64748B);
 
-      // Map API data to DashboardDataModel
+      // Map API data to DashboardDataModel matching design
       dashboardData.value = [
         DashboardDataModel(
-          title: 'Month Target',
+          title: 'Monthly\nTarget',
           value: monthTargetDisplay,
-          iconColor: Colors.purple[400]!,
+          subtitle: targetAchieved ? 'Target achieved' : '',
+          subtitleValue: (targetAchieved || targetSales <= 0)
+              ? null
+              : '₹${NumberFormat('#,##,###').format(remainingToTarget.toInt())}',
+          subtitleLabel: (targetAchieved || targetSales <= 0) ? null : ' to go',
+          subtitleColor: targetAchieved
+              ? const Color(0xFF22C55E)
+              : const Color(0xFFEF4444),
+          subtitleLabelColor: const Color(0xFFEF4444),
+          subtitleIcon: targetAchieved
+              ? Icons.north_east_rounded
+              : (targetSales > 0 ? Icons.south_east_rounded : null),
+          subtitleIconColor: targetAchieved
+              ? const Color(0xFF22C55E)
+              : const Color(0xFFEF4444),
+          iconColor: const Color(0xFFA855F7), // Purple stripe
+          cardIcon: Icons.track_changes_rounded,
+          cardIconColor: const Color(0xFFA855F7),
+          cardIconBgColor: const Color(0xFFFAF5FF),
           onTap: () => Get.to(() => const EarningScreen()),
         ),
         DashboardDataModel(
-          title: 'Sales This Month',
+          title: 'Sales This\nMonth',
           value: '₹${NumberFormat('#,##,###').format(thisMonthSales.toInt())}',
           subtitle: salesToTargetSubtitle,
           subtitleColor: salesToTargetSubtitleColor,
@@ -226,37 +232,34 @@ class DashboardController extends GetxController {
           subtitleValue: salesToTargetValue,
           subtitleLabel: salesToTargetLabel,
           subtitleLabelColor: salesToTargetLabelColor,
-          iconColor: Colors.red[400]!,
+          iconColor: const Color(0xFFEF4444), // Red stripe
+          cardIcon: Icons.trending_up_rounded,
+          cardIconColor: const Color(0xFFEF4444),
+          cardIconBgColor: const Color(0xFFFEF2F2),
           onTap: () => Get.to(() => const EarningScreen()),
         ),
         DashboardDataModel(
           title: 'Clicks',
           value: '$clicksThisMonth',
-          trendValue: pctChange(
-            clicksThisMonth.toDouble(),
-            clicksLastMonth.toDouble(),
-          ),
+          trendValue: '$clicksThisMonth',
           trendLabel: 'vs last month',
-          isTrendPositive: isPositive(
-            clicksThisMonth.toDouble(),
-            clicksLastMonth.toDouble(),
-          ),
-          iconColor: Colors.blue[400]!,
+          isTrendPositive: true,
+          iconColor: const Color(0xFF3B82F6), // Blue stripe
+          cardIcon: Icons.near_me_outlined,
+          cardIconColor: const Color(0xFF3B82F6),
+          cardIconBgColor: const Color(0xFFEFF6FF),
           onTap: () => Get.to(() => const AllLinkView()),
         ),
         DashboardDataModel(
-          title: 'Total Orders',
+          title: 'Total\nOrders',
           value: '$totalOrderCount',
-          trendValue: pctChange(
-            thisMonthConversions.toDouble(),
-            lastMonthConversions.toDouble(),
-          ),
-          trendLabel: 'from last month',
-          isTrendPositive: isPositive(
-            thisMonthConversions.toDouble(),
-            lastMonthConversions.toDouble(),
-          ),
-          iconColor: Colors.green[400]!,
+          trendValue: '$totalOrderCount',
+          trendLabel: 'from last\nmonth',
+          isTrendPositive: true,
+          iconColor: const Color(0xFF22C55E), // Green stripe
+          cardIcon: Icons.shopping_bag_outlined,
+          cardIconColor: const Color(0xFF22C55E),
+          cardIconBgColor: const Color(0xFFF0FDF4),
           onTap: () {
             if (!Get.isRegistered<OrderController>()) {
               Get.put(OrderController());
@@ -266,12 +269,15 @@ class DashboardController extends GetxController {
           },
         ),
         DashboardDataModel(
-          title: 'Total Revenue',
+          title: 'Total\nRevenue',
           value: '₹${NumberFormat('#,##,###').format(totalRevenue.toInt())}',
-          trendValue: pctChange(totalRevenue, lastMonthRevenue),
-          trendLabel: 'since last week',
-          isTrendPositive: isPositive(totalRevenue, lastMonthRevenue),
-          iconColor: Colors.orange[400]!,
+          trendValue: '0',
+          trendLabel: 'since last\nweek',
+          isTrendPositive: true,
+          iconColor: const Color(0xFFF59E0B), // Orange stripe
+          cardIcon: Icons.currency_rupee_rounded,
+          cardIconColor: const Color(0xFFF59E0B),
+          cardIconBgColor: const Color(0xFFFFFBEB),
           onTap: () => Get.to(() => const EarningScreen()),
         ),
       ];
@@ -280,7 +286,8 @@ class DashboardController extends GetxController {
       dashboardData.value = [];
     } else {
       final msg = result['message']?.toString() ?? '';
-      final isNetworkError = msg.contains('SocketException') ||
+      final isNetworkError =
+          msg.contains('SocketException') ||
           msg.contains('Failed host lookup') ||
           msg.contains('Network error') ||
           msg.contains('ClientException');
@@ -295,68 +302,99 @@ class DashboardController extends GetxController {
   }
 
   /// Fetches the commission slab from the API and derives the month target
-  /// from the current slab's maxSales — the same target shown in Earning Panel.
+  /// from the current/next slab — matching the Earning Panel.
   Future<void> fetchSlabDetails() async {
     try {
       final result = await DashboardRepo.getSlab();
       if (result['success'] && result['data'] != null) {
         final data = result['data'];
-        List<dynamic>? slabList;
-        int? currentIndex;
+        debugPrint("DashboardController: Slab API Response Data: $data");
 
         if (data is Map<String, dynamic>) {
-          if (data['allSlabs'] is List) {
-            slabList = data['allSlabs'] as List<dynamic>;
-            currentIndex = data['currentSlabIndex'] as int?;
-          }
-        } else if (data is List && data.isNotEmpty) {
-          slabList = data;
-          // Fallback: find isCurrent flag
-          currentIndex = slabList.indexWhere(
-            (s) => (s as Map<String, dynamic>)['isCurrent'] == true,
-          );
-          if (currentIndex == -1) currentIndex = 0;
-        }
+          // 1. Total Sales from slab
+          final totalSalesVal = (data['totalSales'] ?? 0).toDouble();
+          slabTotalSales.value = totalSalesVal;
 
-        if (slabList != null && slabList.isNotEmpty) {
-          int tierForLog = 1;
-          // When no current slab yet (e.g. currentSlabIndex=-1), use nextSlab.minSales as the target (₹1).
-          if (data is Map<String, dynamic> &&
-              currentIndex != null &&
-              currentIndex < 0 &&
-              data['nextSlab'] is Map<String, dynamic>) {
-            final next = data['nextSlab'] as Map<String, dynamic>;
-            final double nextMin = (next['minSales'] ?? 0).toDouble();
-            slabMinSales.value = 0;
-            if (nextMin > 0) slabTarget.value = nextMin;
-          } else {
-            final idx = (currentIndex ?? 0).clamp(0, slabList.length - 1);
-            tierForLog = idx + 1;
-            final currentSlab = slabList[idx] as Map<String, dynamic>;
-            final double maxSales = (currentSlab['maxSales'] ?? 0).toDouble();
-            final double minSales = (currentSlab['minSales'] ?? 0).toDouble();
-            if (maxSales > 0) slabTarget.value = maxSales;
-            if (minSales >= 0) slabMinSales.value = minSales;
+          // 2. Current slab index & maps
+          final int currentIndexVal = (data['currentSlabIndex'] as int?) ?? -1;
+          currentSlabIndex.value = currentIndexVal;
+
+          final currentSlabMap = data['currentSlab'] is Map<String, dynamic>
+              ? data['currentSlab'] as Map<String, dynamic>
+              : null;
+          final nextSlabMap = data['nextSlab'] is Map<String, dynamic>
+              ? data['nextSlab'] as Map<String, dynamic>
+              : null;
+          final List<dynamic>? slabList = data['allSlabs'] is List
+              ? data['allSlabs'] as List<dynamic>
+              : null;
+
+          double target = 0.0;
+          double minS = 0.0;
+          double curComm = 0.0;
+          double nextComm = 0.0;
+          String curName = '';
+          String nxtName = '';
+
+          if (currentSlabMap != null && currentIndexVal >= 0) {
+            curComm = (currentSlabMap['commissionPercentage'] ?? 0).toDouble();
+            minS = (currentSlabMap['minSales'] ?? 0).toDouble();
+            final double curMax = (currentSlabMap['maxSales'] ?? 0).toDouble();
+            curName = 'Tier ${currentIndexVal + 1}';
+
+            // Target to reach/complete current slab: prefer upper limit (maxSales), e.g. 1, 40001, 50000
+            if (curMax > 0 && curMax < 999999999) {
+              target = curMax;
+            } else if (nextSlabMap != null) {
+              final double nextMax = (nextSlabMap['maxSales'] ?? 0).toDouble();
+              target = nextMax > 0
+                  ? nextMax
+                  : (nextSlabMap['minSales'] ?? 0).toDouble();
+            } else {
+              target = minS;
+            }
+
+            if (nextSlabMap != null) {
+              nextComm = (nextSlabMap['commissionPercentage'] ?? 0).toDouble();
+              nxtName = 'Tier ${currentIndexVal + 2}';
+            } else {
+              nxtName = '';
+            }
+          } else if (nextSlabMap != null) {
+            // User has no active slab yet (Starter) -> target is upper threshold of next slab
+            curComm = 0.0;
+            minS = 0.0;
+            curName = 'Starter';
+            nextComm = (nextSlabMap['commissionPercentage'] ?? 0).toDouble();
+            final double nextMin = (nextSlabMap['minSales'] ?? 0).toDouble();
+            final double nextMax = (nextSlabMap['maxSales'] ?? 0).toDouble();
+            nxtName = 'Tier 1';
+            // Prefer opposite price / maxSales (e.g. 1, 40001, 50000), fallback to minSales
+            target = nextMax > 0 ? nextMax : (nextMin > 0 ? nextMin : 0.0);
+          } else if (slabList != null && slabList.isNotEmpty) {
+            final first = slabList[0] as Map<String, dynamic>;
+            final double firstMin = (first['minSales'] ?? 0).toDouble();
+            final double firstMax = (first['maxSales'] ?? 0).toDouble();
+            nextComm = (first['commissionPercentage'] ?? 0).toDouble();
+            nxtName = 'Tier 1';
+            curName = 'Starter';
+            target = firstMax > 0 ? firstMax : (firstMin > 0 ? firstMin : 0.0);
           }
+
+          slabTarget.value = target;
+          slabMinSales.value = minS;
+          currentCommissionRate.value = curComm;
+          nextCommissionRate.value = nextComm;
+          currentTierName.value = curName;
+          nextTierName.value = nxtName;
+
           debugPrint(
-            'DashboardController: Slab range set to ${slabMinSales.value} - ${slabTarget.value} (Tier $tierForLog)',
-          );
-        }
-        // Default current slab is Tier 1 → use ₹30,000 if no slab target was set
-        if (slabTarget.value <= 1) {
-          slabTarget.value = 30000;
-          slabMinSales.value = 1;
-          debugPrint(
-            'DashboardController: Using default Tier 1 target ${slabTarget.value}',
+            'DashboardController: Slab target=$target, minSales=$minS, curComm=$curComm%, nextComm=$nextComm% ($curName -> $nxtName)',
           );
         }
       }
     } catch (e) {
       debugPrint('DashboardController: Error fetching slab details: $e');
-      if (slabTarget.value <= 0) {
-        slabTarget.value = 30000;
-        slabMinSales.value = 1;
-      }
     }
   }
 
