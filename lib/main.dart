@@ -21,6 +21,7 @@ void main() async {
 }
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(375, 812), // Standard mobile design size

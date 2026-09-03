@@ -3,7 +3,7 @@ import 'package:care_mall_affiliate/src/modules/auth/controller/auth_controller.
 import 'package:care_mall_affiliate/src/modules/kyc_profile/view/kyc_screen.dart';
 import 'package:care_mall_affiliate/src/modules/affilatelinks/model/link_model.dart';
 import 'package:care_mall_affiliate/src/modules/affilatelinks/repo/link_repo.dart';
-import 'package:care_mall_affiliate/src/modules/commoncontroller/share_product.dart';
+import 'package:care_mall_affiliate/app/commoncontroller/share_product.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
