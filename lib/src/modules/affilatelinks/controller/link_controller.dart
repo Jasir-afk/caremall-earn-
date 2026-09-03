@@ -94,8 +94,24 @@ class CreateLinkController extends GetxController {
 
   Future<void> loadData() async {
     isLoading.value = true;
-    await Future.wait([fetchProducts(), fetchGeneratedLinks(), fetchStats()]);
+    // Respect the active search query so pull-to-refresh doesn't lose the filter
+    await Future.wait([
+      fetchProducts(search: searchQuery.value),
+      fetchGeneratedLinks(),
+      fetchStats(),
+    ]);
     isLoading.value = false;
+  }
+
+  /// Called by the pull-to-refresh indicator. Clears the search state first,
+  /// then loads all data fresh.
+  Future<void> refreshData() async {
+    searchQuery.value = '';
+    searchTextController.clear();
+    currentPage.value = 1;
+    currentPageProducts.value = 1;
+    hasMoreProducts.value = true;
+    await loadData();
   }
 
   Future<void> fetchProducts({
@@ -206,9 +222,11 @@ class CreateLinkController extends GetxController {
             .where((p) => p.productName.toLowerCase().contains(query))
             .toList(),
       );
-      // Also filter generated links locally to ensure search works there immediately
+      // Also filter generated links locally to ensure search works there immediately.
+      // Use a snapshot to avoid reading from the list while we write to it.
+      final snapshot = List.of(generatedFilteredProducts);
       generatedFilteredProducts.assignAll(
-        generatedFilteredProducts
+        snapshot
             .where((p) => p.productName.toLowerCase().contains(query))
             .toList(),
       );
