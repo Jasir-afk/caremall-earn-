@@ -52,7 +52,7 @@ class AllLinkView extends GetView<CreateLinkController> {
           return Stack(
             children: [
               RefreshIndicator(
-                onRefresh: controller.loadData,
+                onRefresh: controller.refreshData,
                 color: AppColors.primarycolor,
                 backgroundColor: Colors.white,
                 child: SingleChildScrollView(
@@ -255,6 +255,7 @@ class AllLinkView extends GetView<CreateLinkController> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: TextField(
+          controller: controller.searchTextController,
           onChanged: controller.searchProducts,
           decoration: InputDecoration(
             hintText: 'Search Products',

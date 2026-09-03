@@ -10,7 +10,6 @@ import 'package:care_mall_affiliate/src/modules/orders/view/cancelled_order.dart
 import 'package:care_mall_affiliate/src/modules/orders/view/all_order_screen.dart';
 import 'package:care_mall_affiliate/src/modules/orders/view/delived_order.dart';
 import 'package:care_mall_affiliate/src/modules/orders/view/pending_order.dart';
-import 'package:care_mall_affiliate/src/modules/orders/view/return_order.dart';
 import 'package:care_mall_affiliate/src/modules/orders/controller/order_controller.dart';
 import 'package:care_mall_affiliate/src/modules/payout/view/payout_view.dart';
 import 'package:flutter/material.dart';
@@ -184,20 +183,7 @@ class AppDrawer extends StatelessWidget {
                         },
                         isSubItem: true,
                       ),
-                      _buildDrawerItem(
-                        icon: Icons.assignment_return_outlined,
-                        label: 'Returned Orders',
-                        isSelected: Get.currentRoute == '/ReturnOrderScreen',
-                        onTap: () {
-                          Get.back();
-                          if (!Get.isRegistered<OrderController>()) {
-                            Get.put(OrderController());
-                          }
-                          Get.find<OrderController>().clearFilters();
-                          Get.to(() => const ReturnOrderScreen());
-                        },
-                        isSubItem: true,
-                      ),
+
                     ],
                   ),
                   _buildDrawerItem(
