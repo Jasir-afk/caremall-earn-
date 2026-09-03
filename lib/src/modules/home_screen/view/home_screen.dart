@@ -8,7 +8,7 @@ import 'package:care_mall_affiliate/src/modules/kyc_profile/view/kyc_screen.dart
 import 'package:care_mall_affiliate/app/commenwidget/apptext.dart';
 import 'package:care_mall_affiliate/app/theme_data/app_colors.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/view/widgets/app_drawer.dart';
-import 'package:care_mall_affiliate/src/modules/dashboard/view/dashboardcard.dart';
+import 'package:care_mall_affiliate/src/modules/dashboard/dashboardcard.dart';
 import 'package:care_mall_affiliate/src/modules/home_screen/view/widgets/quick_actions_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

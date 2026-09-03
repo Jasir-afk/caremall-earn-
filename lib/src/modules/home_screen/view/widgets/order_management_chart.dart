@@ -131,70 +131,75 @@ class _OrderManagementChartState extends State<OrderManagementChart>
               children: [
                 PieChart(
                   PieChartData(
-                    sectionsSpace: 0,
-                    centerSpaceRadius: 70.w,
+                    sectionsSpace: totalOrders == 0 ? 0 : 4,
+                    centerSpaceRadius: 65.w,
+                    startDegreeOffset: -90,
                     sections: totalOrders == 0
                         ? [
                             PieChartSectionData(
                               color: Colors.grey[200]!,
                               value: 1,
                               title: '',
-                              radius: 25.w,
+                              radius: 20.w,
+                              showTitle: false,
                             ),
                           ]
                         : [
-                            PieChartSectionData(
-                              color: const Color(0xFFD92D20), // Cancelled - Red
-                              value: cancelled.toDouble(),
-                              title: '',
-                              radius: 25.w,
-                            ),
-                            PieChartSectionData(
-                              color: const Color(
-                                0xFF2D8A29,
-                              ), // Delivered - Dark Green
-                              value: delivered.toDouble(),
-                              title: '',
-                              radius: 25.w,
-                            ),
-                            PieChartSectionData(
-                              color: const Color(
-                                0xFFF79009,
-                              ), // Processing - Orange
-                              value: processing.toDouble(),
-                              title: '',
-                              radius: 25.w,
-                            ),
-                            PieChartSectionData(
-                              color: const Color(
-                                0xFF7F56D9,
-                              ), // Returned - Purple
-                              value: returned.toDouble(),
-                              title: '',
-                              radius: 25.w,
-                            ),
+                            if (returned > 0)
+                              PieChartSectionData(
+                                color: const Color(0xFF7080EE), // Returned - Purple/Blue
+                                value: returned.toDouble(),
+                                title: '',
+                                radius: 20.w,
+                                showTitle: false,
+                              ),
+                            if (cancelled > 0)
+                              PieChartSectionData(
+                                color: const Color(0xFFEB4444), // Cancelled - Red
+                                value: cancelled.toDouble(),
+                                title: '',
+                                radius: 20.w,
+                                showTitle: false,
+                              ),
+                            if (processing > 0)
+                              PieChartSectionData(
+                                color: const Color(0xFFEE9209), // Processing - Amber/Orange
+                                value: processing.toDouble(),
+                                title: '',
+                                radius: 20.w,
+                                showTitle: false,
+                              ),
+                            if (delivered > 0)
+                              PieChartSectionData(
+                                color: const Color(0xFF27B558), // Delivered - Vibrant Green
+                                value: delivered.toDouble(),
+                                title: '',
+                                radius: 20.w,
+                                showTitle: false,
+                              ),
                           ],
                   ),
-                  duration: Duration.zero,
+                  duration: const Duration(milliseconds: 300),
                 ),
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '$totalOrders',
+                        'Total',
                         style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          fontSize: 14.sp,
+                          color: const Color(0xFF8C98A4),
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
+                      SizedBox(height: 2.h),
                       Text(
-                        'TOTAL',
+                        '$totalOrders',
                         style: TextStyle(
-                          fontSize: 10.sp,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 26.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
                         ),
                       ),
                     ],
@@ -210,16 +215,15 @@ class _OrderManagementChartState extends State<OrderManagementChart>
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-
                   children: [
                     _buildLegendItem(
-                      const Color(0xFFD92D20),
+                      const Color(0xFFEB4444),
                       'Cancelled',
                       cancelled,
                     ),
                     SizedBox(width: 24.w),
                     _buildLegendItem(
-                      const Color(0xFF2D8A29),
+                      const Color(0xFF27B558),
                       'Delivered',
                       delivered,
                     ),
@@ -230,13 +234,13 @@ class _OrderManagementChartState extends State<OrderManagementChart>
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildLegendItem(
-                      const Color(0xFFF79009),
+                      const Color(0xFFEE9209),
                       'Processing',
                       processing,
                     ),
                     SizedBox(width: 24.w),
                     _buildLegendItem(
-                      const Color(0xFF7F56D9),
+                      const Color(0xFF7080EE),
                       'Returned',
                       returned,
                     ),
